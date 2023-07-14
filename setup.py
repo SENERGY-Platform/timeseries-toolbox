@@ -3,7 +3,7 @@
 import setuptools
 
 setuptools.setup(
-      name='ML Toolbox',
+      name='timeseries-toolbox',
       version='1.0',
       description='ML Toolbox',
       author='Hannes Hansen',
