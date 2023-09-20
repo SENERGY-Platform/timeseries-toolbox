@@ -2,11 +2,11 @@ from torch import nn
 import torch.nn.functional as F
 
 class Encoder(nn.Module):
-    def __init__(self, latent_dims, window_length):
+    def __init__(self, latent_dims, window_length, kernel_size):
         super().__init__()
         self.window_length = window_length
-        self.conv1 = nn.Conv1d(1, 16, 7, stride=3) # Size of each channel: (205-7)/3+1=67
-        self.conv2 = nn.Conv1d(16, 32, 7, stride=3)# Size of each channel: (67-7)/3+1=21
+        self.conv1 = nn.Conv1d(1, 16, kernel_size, stride=3) # Size of each channel: (205-7)/3+1=67
+        self.conv2 = nn.Conv1d(16, 32, kernel_size, stride=3)# Size of each channel: (67-7)/3+1=21
         
         self.fc1 = nn.Linear(672, latent_dims)
         
@@ -24,11 +24,11 @@ class Encoder(nn.Module):
         return x
 
 class Decoder(nn.Module):
-    def __init__(self, latent_dims):
+    def __init__(self, latent_dims, kernel_size):
         super().__init__()
         self.fc1 = nn.Linear(latent_dims, 672)
-        self.convt1 = nn.ConvTranspose1d(32, 16, kernel_size=7, stride=3)
-        self.convt2 = nn.ConvTranspose1d(16, 1, kernel_size=7, stride=3)
+        self.convt1 = nn.ConvTranspose1d(32, 16, kernel_size=kernel_size, stride=3)
+        self.convt2 = nn.ConvTranspose1d(16, 1, kernel_size=kernel_size, stride=3)
         
         self.dropout = nn.Dropout(p=0.4)
         
@@ -43,11 +43,11 @@ class Decoder(nn.Module):
         return z
 
 class Autoencoder(nn.Module):
-    def __init__(self, latent_dims, window_length):
+    def __init__(self, latent_dims, window_length, kernel_size=7):
         super().__init__()
         self.window_length = window_length
-        self.encoder = Encoder(latent_dims, window_length)
-        self.decoder = Decoder(latent_dims)
+        self.encoder = Encoder(latent_dims, window_length, kernel_size)
+        self.decoder = Decoder(latent_dims, kernel_size)
 
     def forward(self, x):
         z = self.encoder(x)

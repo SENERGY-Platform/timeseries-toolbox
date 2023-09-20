@@ -15,7 +15,8 @@ class CNNAnomalyPipeline(AnomalyPipeline):
         early_stopping_patience,
         early_stopping_delta,
         latent_dims,
-        plot_enabled
+        plot_enabled,
+        kernel_size
     ):
         super().__init__(
             batch_size,
@@ -29,7 +30,7 @@ class CNNAnomalyPipeline(AnomalyPipeline):
             plot_enabled
         )
         self.window_length = window_length
-        self.model = Autoencoder(latent_dims, window_length)
+        self.model = Autoencoder(latent_dims, window_length, kernel_size)
 
     def create_dataset(self, data):
         # 2D Numpy Array to Torch Dataset
@@ -38,10 +39,11 @@ class CNNAnomalyPipeline(AnomalyPipeline):
         return DataSet(data)
 
     @staticmethod
-    def get_hyperparams(freq, train_ts):
+    def get_hyperparams(freq, train_ts, window_length):
+        kernel_sizes = [2,5,7,10]
+        kernel_sizes = filter(lambda kernel: kernel < window_length, kernel_sizes)
         return {
             'batch_size':  [8, 16, 32, 64, 128],
-            # TODO keine Hyperparameter fuers Training :/ 'quantil': [0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98],
             'op': ['ADAM', 'SGD'],
             'lr': [0.01, 0.001, 0.0001],
             'loss': ['L1', 'MSE'],
@@ -49,5 +51,6 @@ class CNNAnomalyPipeline(AnomalyPipeline):
             'num_epochs': [20],
             'early_stopping_patience': [10],
             'early_stopping_delta': [0],
-            'out_dir': ["."]
+            'out_dir': ["."],
+            'kernel_size': kernel_sizes
         }
