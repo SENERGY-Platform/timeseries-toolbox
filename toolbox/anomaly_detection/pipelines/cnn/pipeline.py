@@ -1,5 +1,6 @@
 from toolbox.anomaly_detection.pipelines.custom_pipeline import AnomalyPipeline
 from toolbox.anomaly_detection.pipelines.cnn.cnn_autoencoder import Autoencoder
+from toolbox.anomaly_detection.pipelines.cnn.dataset import DataSet
 
 class CNNAnomalyPipeline(AnomalyPipeline):
     def __init__(
@@ -28,6 +29,12 @@ class CNNAnomalyPipeline(AnomalyPipeline):
             plot_enabled
         )
         self.model = Autoencoder(latent_dims)
+
+    def create_dataset(self, data):
+        # 2D Numpy Array to Torch Dataset
+        assert data.ndim == 2
+        assert data.shape[1] == self.window_length
+        return DataSet(data)
 
     @staticmethod
     def get_hyperparams(freq, train_ts):
