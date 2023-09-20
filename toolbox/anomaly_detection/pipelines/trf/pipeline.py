@@ -52,7 +52,7 @@ class TRFAnomalyPipeline(AnomalyPipeline):
         return tensor.flatten(1)
 
     @staticmethod
-    def get_hyperparams(freq, train_ts):
+    def get_hyperparams(freq, train_ts, window_length):
         return {
             'batch_size':  [8],
             'op': ['ADAM'],
