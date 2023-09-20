@@ -1,4 +1,5 @@
 from torch.utils.data import Dataset
+import torch 
 
 class DataSet(Dataset):
     def __init__(self, data):
@@ -12,4 +13,5 @@ class DataSet(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx]
+        sample = self.data[idx]
+        return torch.tensor(sample, dtype=torch.double)
