@@ -1,4 +1,6 @@
 from darts.models import NaiveMean
+from .helper import create_darts_encoder_based_on_freq, convert_df_to_ts
+
 import mlflow 
 
 class Baseline(mlflow.pyfunc.PythonModel):
@@ -14,5 +16,5 @@ class Baseline(mlflow.pyfunc.PythonModel):
         return self.model.predict(number_steps)
 
     @staticmethod
-    def get_hyperparams():
+    def get_hyperparams(freq):
         return {}

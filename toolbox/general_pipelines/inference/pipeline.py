@@ -1,5 +1,5 @@
 from torch import nn 
-from general_pipelines.train.logging_utils import ProgressMeter
+from toolbox.general_pipelines.train.logging_utils import ProgressMeter
 import torch 
 import similaritymeasures
     

@@ -1,5 +1,5 @@
 from darts.models import Prophet
-from .helper import create_darts_encoder_based_on_freq
+from .helper import create_darts_encoder_based_on_freq, convert_df_to_ts
 import mlflow 
 
 class DartProphet(mlflow.pyfunc.PythonModel):
@@ -21,7 +21,7 @@ class DartProphet(mlflow.pyfunc.PythonModel):
         return self.model.predict(number_steps)
     
     @staticmethod
-    def get_hyperparams():
+    def get_hyperparams(freq, train_ts):
         # TODO depending on dataset freq 
         hyperparams = {
             "add_time_covariates": [True, False]

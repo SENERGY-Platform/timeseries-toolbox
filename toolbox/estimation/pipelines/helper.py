@@ -1,5 +1,6 @@
 from darts.dataprocessing.transformers.scaler import Scaler 
-#from gluonts.dataset.pandas import PandasDataset
+from gluonts.dataset.pandas import PandasDataset
+from darts import TimeSeries
 
 def create_darts_encoder_based_on_freq(freq):
     date_covariates = ["month"]
@@ -18,6 +19,10 @@ def create_darts_encoder_based_on_freq(freq):
     return encoders
 
 
-#def convert_to_gluon_pandas_dataset(ts, target_column_name):
-#    dataset = PandasDataset.from_long_dataframe(ts.pd_dataframe(), target=target_column_name) # TODO covariates 
-#    return dataset
+def convert_to_gluon_pandas_dataset(df, target_column_name):
+    dataset = PandasDataset.from_long_dataframe(df, target=target_column_name) # TODO covariates 
+    return dataset
+
+def convert_df_to_ts(df, time_col="time", value_cols="value"):
+    ts = TimeSeries.from_dataframe(df, time_col=time_col, value_cols=value_cols)
+    return ts

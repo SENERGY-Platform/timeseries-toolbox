@@ -1,18 +1,31 @@
 import torch.optim as optim
 from torch import nn 
-from general_pipelines.train.logging_utils import AverageMeter, ProgressMeter
+from toolbox.general_pipelines.train.logging_utils import AverageMeter, ProgressMeter
+from toolbox.general_pipelines.train.stopping import EarlyStopping
 import torch 
 import similaritymeasures
-from general_pipelines.train.stopping import EarlyStopping
 import matplotlib.pyplot as plt 
 from os.path import join as pjoin 
 
 class TrainPipeline():
-    def __init__(self, model, train_dataloader, number_epochs, lr, val_dataloader, loss_function, optimizer, out_dir, early_stopping_patience, early_stopping_delta):
+    def __init__(self, 
+        model, 
+        train_dataloader, 
+        number_epochs, 
+        lr, 
+        val_dataloader, 
+        loss_function, 
+        optimizer, 
+        out_dir, 
+        early_stopping_patience, 
+        early_stopping_delta,
+        plot_enabled
+    ):
         self.early_stopping_patience = early_stopping_patience
         self.early_stopping_delta = early_stopping_delta
         self.out_dir = out_dir
         self.model = model
+        self.plot_enabled = plot_enabled
 
         if optimizer == 'SGD':
             self.optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
@@ -129,7 +142,9 @@ class TrainPipeline():
             self.run_validation(epoch)
 
             self.epoch_progress.log_epoch(epoch)
-            self.plot()
+
+            if self.plot_enabled:
+                self.plot()
 
             n_epochs += 1 
             early_stopping(self.val_epoch_losses_meter.val)
