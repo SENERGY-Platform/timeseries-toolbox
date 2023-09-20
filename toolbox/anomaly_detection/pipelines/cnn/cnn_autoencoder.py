@@ -2,8 +2,9 @@ from torch import nn
 import torch.nn.functional as F
 
 class Encoder(nn.Module):
-    def __init__(self, latent_dims):
+    def __init__(self, latent_dims, window_length):
         super().__init__()
+        self.window_length = window_length
         self.conv1 = nn.Conv1d(1, 16, 7, stride=3) # Size of each channel: (205-7)/3+1=67
         self.conv2 = nn.Conv1d(16, 32, 7, stride=3)# Size of each channel: (67-7)/3+1=21
         
@@ -45,7 +46,7 @@ class Autoencoder(nn.Module):
     def __init__(self, latent_dims, window_length):
         super().__init__()
         self.window_length = window_length
-        self.encoder = Encoder(latent_dims)
+        self.encoder = Encoder(latent_dims, window_length)
         self.decoder = Decoder(latent_dims)
 
     def forward(self, x):
