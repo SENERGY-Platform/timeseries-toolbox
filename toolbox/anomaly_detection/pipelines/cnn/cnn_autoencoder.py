@@ -12,7 +12,7 @@ class Encoder(nn.Module):
         self.dropout = nn.Dropout(p=0.6)
 
     def forward(self, x):
-        x = x.view(-1,1,205)
+        x = x.view(-1,1,self.window_length)
         x = F.relu(self.dropout(self.conv1(x)))
         x = F.relu(self.dropout(self.conv2(x)))
         
@@ -42,8 +42,9 @@ class Decoder(nn.Module):
         return z
 
 class Autoencoder(nn.Module):
-    def __init__(self, latent_dims):
+    def __init__(self, latent_dims, window_length):
         super().__init__()
+        self.window_length = window_length
         self.encoder = Encoder(latent_dims)
         self.decoder = Decoder(latent_dims)
 

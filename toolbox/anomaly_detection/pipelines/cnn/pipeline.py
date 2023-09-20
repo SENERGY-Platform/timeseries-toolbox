@@ -29,7 +29,7 @@ class CNNAnomalyPipeline(AnomalyPipeline):
             plot_enabled
         )
         self.window_length = window_length
-        self.model = Autoencoder(latent_dims)
+        self.model = Autoencoder(latent_dims, window_length)
 
     def create_dataset(self, data):
         # 2D Numpy Array to Torch Dataset
