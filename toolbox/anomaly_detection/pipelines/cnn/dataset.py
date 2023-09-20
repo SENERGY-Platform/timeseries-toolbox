@@ -14,4 +14,4 @@ class DataSet(Dataset):
 
     def __getitem__(self, idx):
         sample = self.data[idx]
-        return torch.tensor(sample, dtype=torch.double)
+        return torch.tensor(sample, dtype=torch.float32)
