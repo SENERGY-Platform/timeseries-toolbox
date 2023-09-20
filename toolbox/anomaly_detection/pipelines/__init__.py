@@ -1,2 +1,2 @@
-from .cnn.pipeline import AnomalyPipeline as CNNAnomalyPipeline
-from .trf.pipeline import AnomalyPipeline as TRFAnomalyPipeline
+from .cnn.pipeline import CNNAnomalyPipeline 
+from .trf.pipeline import TRFAnomalyPipeline
