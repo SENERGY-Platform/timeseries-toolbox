@@ -28,6 +28,7 @@ class CNNAnomalyPipeline(AnomalyPipeline):
             early_stopping_delta,
             plot_enabled
         )
+        self.window_length = window_length
         self.model = Autoencoder(latent_dims)
 
     def create_dataset(self, data):
