@@ -1,9 +1,11 @@
 from toolbox.general_pipelines.train.pipeline import TrainPipeline
 from toolbox.general_pipelines.inference.pipeline import InferencePipeline
+
 from torch.utils.data import DataLoader
 import torch 
+import mlflow
 
-class AnomalyPipeline():
+class AnomalyPipeline(mlflow.pyfunc.PythonModel):
     def __init__(
         self,
         batch_size,
@@ -16,6 +18,7 @@ class AnomalyPipeline():
         early_stopping_delta,
         plot_enabled
     ):
+        super().__init__()
         self.batch_size = batch_size
         self.lr = lr 
         self.num_epochs = num_epochs
