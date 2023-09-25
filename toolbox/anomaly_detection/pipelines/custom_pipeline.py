@@ -64,7 +64,7 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         if quantil:
             self.quantil = quantil
         
-        self.predict(data)
+        return self.predict(data)
 
     def predict(self, data):
         test_dataset = self.create_dataset(data)
