@@ -76,5 +76,5 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         reconstructions = self.convert_to_numpy(self.test_recons) 
         return reconstructions, anomaly_indices, normal_indices, self.test_losses
     
-    def predict(self, context, data, params):
+    def predict(self, context, data, params=None):
         return self._predict(data)    
