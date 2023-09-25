@@ -60,12 +60,18 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
             
             return anomaly_indices, normal_indices
 
-    def predict(self, data, quantil):
+    def predict_with_quantil(self, data, quantil):
+        if quantil:
+            self.quantil = quantil
+        
+        self.predict(data)
+
+    def predict(self, data):
         test_dataset = self.create_dataset(data)
         dataloader = DataLoader(test_dataset, batch_size=64)
         pipeline = InferencePipeline(self.model, dataloader, self.loss)
         self.test_losses, self.test_recons = pipeline.run()
 
-        anomaly_indices, normal_indices = self.get_anomalies("quantil", quantil)
+        anomaly_indices, normal_indices = self.get_anomalies("quantil", self.quantil)
         reconstructions = self.convert_to_numpy(self.test_recons) 
         return reconstructions, anomaly_indices, normal_indices, self.test_losses
