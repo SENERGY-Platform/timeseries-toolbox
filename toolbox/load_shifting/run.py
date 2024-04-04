@@ -13,12 +13,6 @@ from toolbox.ml_config import Config
 from toolbox.data.loaders.s3.s3 import S3DataLoader
 
 
-
-
-def create_experiment(exp_name):
-    experiment_id = mlflow.create_experiment(exp_name)
-    return experiment_id   
-
 '''Glätten, Shiften, Padden'''
 
 
@@ -124,13 +118,6 @@ def store_shifted_loads(optimal_shifted_loads, exp_name):
     #    with mlflow.start_run(experiment_id=experiment_id, run_name=run_name):
     #        mlflow.log_artifact(path)
 
-def testload(s, load_domain, value, peak_length, valley_length):
-    shape = load_domain.shape
-    aux_list = []
-    for k in range(20):
-        aux_list.append(np.logical_and((k*peak_length+k*valley_length+s)*np.ones(shape) <= load_domain, load_domain < ((k+1)*peak_length+k*valley_length+s)*np.ones(shape)).astype(float))
-    return value*np.sum(np.array(aux_list), axis=0)
-
 def load_data(exp_name, s3_url, aws_access, aws_secret, bucket_name):
     loader = S3DataLoader(s3_url, aws_access, aws_secret)
     return loader.get_data(bucket_name, exp_name)
@@ -147,16 +134,6 @@ def run_load_shifting():
 
     # Anzahl der verschiedenen Lastgangkurven.
     number_of_loads = loads_matrix.shape[0]
-
-    # Dieses array enthält als Zeilen die einzelnen Lastgangkurven. Alle Kurven sind über die selben Stützstellen definiert.
-    #loads_matrix = np.asarray([loads1['value'].to_numpy(), loads1['value'].to_numpy()])
-    #load_domain = np.arange(-1,50,0.01)
-    #values = [1, 1, 1]
-    #peak_lengths = [1, 1, 2]
-    #valley_lengths = [3, 3, 2]
-    #loads_matrix = np.asarray([testload(0, load_domain, values[0], peak_lengths[0], valley_lengths[0]),
-    #testload(0, load_domain, values[1], peak_lengths[1], valley_lengths[1]),
-    #testload(0, load_domain, values[2], peak_lengths[2], valley_lengths[2])])
 
     hyperparams = {
         'xtol': 0.0000001,
