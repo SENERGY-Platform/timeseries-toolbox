@@ -1,12 +1,12 @@
 import uuid
 import json 
-from collections import defaultdict
 
 from ksql import KSQLAPI
 import pandas as pd 
 from ksql_query_builder import Builder, SelectContainer, CreateContainer
-from config import KafkaTopicConfiguration
-from data.loaders.loader import DataLoader
+
+from toolbox.ml_config import KafkaTopicConfiguration
+from toolbox.data.loaders.loader import DataLoader
 
 class KafkaLoader(DataLoader):
     def __init__(self, ksql_server_url, topic_config: KafkaTopicConfiguration, experiment_name):

@@ -15,6 +15,15 @@ class KafkaTopicConfiguration:
     path_to_time: str = None
     path_to_value: str = None
     experiment_name: str = None
+    ksql_url: str = None
+
+@dataclass
+class S3Configuration:
+    """"""
+    s3_url: str = None
+    bucket_name: str = None 
+    aws_secret: str = None 
+    aws_access: str = None
 
 @dataclass
 class EstimationSettings:
@@ -28,17 +37,17 @@ class AnomalySettings:
 
 class Config:
     """Base config."""
-    KSQL_SERVER_URL = environ["KSQL_SERVER_URL"]
     MLFLOW_URL = environ['MLFLOW_URL']
     EXPERIMENT_NAME = environ.get('EXPERIMENT_NAME', str(uuid.uuid4().hex))
+    USER_ID = environ['USER_ID']
+    TASK = environ.get('TASK')
+    DATA_SOURCE = environ['DATA_SOURCE']
+    
     MODEL_ARTIFACT_NAME = environ.get('MODEL_ARTIFACT_NAME')
     METRIC_FOR_SELECTION = environ.get('METRIC_FOR_SELECTION', 'mae')
     METRIC_DIRECTION = environ.get('METRIC_DIRECTION', 'min')
-    USER_ID = environ['USER_ID']
-    TASK = environ.get('TASK')
-    COMMIT = environ['COMMIT']
+    COMMIT = environ.get('COMMIT', '')
     MODELS = environ.get('MODELS','').split(';')
-    DATA_SOURCE = environ['DATA_SOURCE']
     PREPROCESSOR = environ.get('PREPROCESSOR')
     
     def __init__(self) -> None:
@@ -49,6 +58,8 @@ class Config:
     def parse_data_settings(self):
         if self.DATA_SOURCE == 'kafka':
             self.DATA_SETTINGS = KafkaTopicConfiguration(**json.loads(environ['DATA_SETTINGS']))
+        if self.DATA_SOURCE == 's3':
+            self.DATA_SETTINGS = S3Configuration(**json.loads(environ['DATA_SETTINGS']))
             
     def parse_task_settings(self, task_settings):
         task_settings = json.loads(task_settings)

@@ -131,16 +131,16 @@ def testload(s, load_domain, value, peak_length, valley_length):
         aux_list.append(np.logical_and((k*peak_length+k*valley_length+s)*np.ones(shape) <= load_domain, load_domain < ((k+1)*peak_length+k*valley_length+s)*np.ones(shape)).astype(float))
     return value*np.sum(np.array(aux_list), axis=0)
 
-def load_data(exp_name):
-    loader = S3DataLoader()
-    return loader.get_data("preprocessing", exp_name)
+def load_data(exp_name, s3_url, aws_access, aws_secret, bucket_name):
+    loader = S3DataLoader(s3_url, aws_access, aws_secret)
+    return loader.get_data(bucket_name, exp_name)
 
 def run_load_shifting():
     '''Parameter, die während des Pre-Processings der einzelnen Lastgangkurven bestimmt werden müssen'''
     config = Config()
     mlflow.set_tracking_uri(config.MLFLOW_URL)
     exp_name = config.EXPERIMENT_NAME
-    preprocessed_data = load_data(exp_name)
+    preprocessed_data = load_data(exp_name, config.DATA_SETTINGS.s3_url, config.DATA_SETTINGS.aws_access, config.DATA_SETTINGS.aws_secret, config.DATA_SETTINGS.bucket_name)
     loads_matrix = preprocessed_data['loads']
     resolution = preprocessed_data['resolution']
     smoothing_window_lengths = preprocessed_data['smoothing_window_lengths']
