@@ -36,6 +36,12 @@ class AnomalySettings:
 
 class Config:
     """Base config."""
+    MLFLOW_URL: str = None 
+    EXPERIMENT_NAME: str = None
+    USER_ID: str = None 
+    TASK: str = None 
+    DATA_SOURCE: str = None 
+    
     def __init__(self) -> None:
         self.load_from_env()
         self.parse_data_settings()
