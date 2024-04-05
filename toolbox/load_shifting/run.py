@@ -148,7 +148,7 @@ def run_load_shifting():
     best_config = best_result.config
     print(f"Best Parameters: {best_config}")
 
-    optimal_shifted_loads, _ = find_optim_shift_loads_per_config(loads_matrix, best_config)
+    optimal_shifted_loads, _ = find_optim_shift_loads_per_config(loads_matrix, resolution, smoothing_window_lengths, best_config)
     print(optimal_shifted_loads)
     
     store_shifted_loads(optimal_shifted_loads, exp_name)
