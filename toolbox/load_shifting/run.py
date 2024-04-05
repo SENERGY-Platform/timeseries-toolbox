@@ -93,7 +93,7 @@ def run_across_hyperparams(hyperparams, experiment_name, loads, resolution, smoo
                 # Set Ray Tune verbosity. Print summary table only with levels 2 or 3.
                 verbose=2,
                 callbacks=[MLflowLoggerCallback(
-                    tracking_uri=Config.MLFLOW_URL,
+                    tracking_uri=Config().MLFLOW_URL,
                     experiment_name=experiment_name,
                     save_artifact=True,
                 )]
