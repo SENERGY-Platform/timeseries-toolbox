@@ -22,6 +22,7 @@ class S3Configuration:
     bucket_name: str = None 
     aws_secret: str = None 
     aws_access: str = None
+    file_name: str = None
 
 @dataclass
 class EstimationSettings:

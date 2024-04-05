@@ -119,9 +119,9 @@ def store_shifted_loads(optimal_shifted_loads, exp_name):
     #    with mlflow.start_run(experiment_id=experiment_id, run_name=run_name):
     #        mlflow.log_artifact(path)
 
-def load_data(exp_name, s3_url, aws_access, aws_secret, bucket_name):
+def load_data(file_name, s3_url, aws_access, aws_secret, bucket_name):
     loader = S3DataLoader(s3_url, aws_access, aws_secret)
-    return loader.get_data(bucket_name, exp_name)
+    return loader.get_data(bucket_name, file_name)
 
 def run_load_shifting():
     '''Parameter, die während des Pre-Processings der einzelnen Lastgangkurven bestimmt werden müssen'''
@@ -130,7 +130,7 @@ def run_load_shifting():
     logging.debug(f"CONFIG: {config}")
     mlflow.set_tracking_uri(config.MLFLOW_URL)
     exp_name = config.EXPERIMENT_NAME
-    preprocessed_data = load_data(exp_name, config.DATA_SETTINGS.s3_url, config.DATA_SETTINGS.aws_access, config.DATA_SETTINGS.aws_secret, config.DATA_SETTINGS.bucket_name)
+    preprocessed_data = load_data(config.DATA_SETTINGS.file_name, config.DATA_SETTINGS.s3_url, config.DATA_SETTINGS.aws_access, config.DATA_SETTINGS.aws_secret, config.DATA_SETTINGS.bucket_name)
     loads_matrix = preprocessed_data['loads']
     resolution = preprocessed_data['resolution']
     smoothing_window_lengths = preprocessed_data['smoothing_window_lengths']
