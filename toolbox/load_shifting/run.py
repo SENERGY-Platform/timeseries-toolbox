@@ -151,4 +151,4 @@ def run_load_shifting():
     optimal_shifted_loads, _ = find_optim_shift_loads_per_config(loads_matrix, resolution, smoothing_window_lengths, best_config)
     print(optimal_shifted_loads)
     
-    store_shifted_loads(optimal_shifted_loads, config.DATA_SETTINGS.file_name, config.DATA_SETTINGS.s3_url, config.DATA_SETTINGS.aws_access, config.DATA_SETTINGS.aws_secret, config.DATA_SETTINGS.bucket_name)
+    store_shifted_loads(optimal_shifted_loads, config.DATA_SETTINGS.file_name, config.DATA_SETTINGS.s3_url, config.DATA_SETTINGS.aws_access, config.DATA_SETTINGS.aws_secret)
