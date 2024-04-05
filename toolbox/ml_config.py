@@ -36,6 +36,7 @@ class AnomalySettings:
 class Config:
     """Base config."""
     def __init__(self) -> None:
+        self.load_from_env()
         self.parse_data_settings()
         if environ.get('TASK_SETTINGS'):
             self.parse_task_settings(environ.get('TASK_SETTINGS'))
