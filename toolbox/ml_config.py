@@ -1,8 +1,6 @@
 from os import environ
 import uuid 
 
-from dotenv import load_dotenv
-load_dotenv()
 from dataclasses import dataclass
 import json
 
