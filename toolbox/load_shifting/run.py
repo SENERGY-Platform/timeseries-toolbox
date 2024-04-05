@@ -1,5 +1,6 @@
 import tempfile
 from pathlib import Path
+import logging 
 
 import mlflow
 from ray import air, tune
@@ -125,6 +126,8 @@ def load_data(exp_name, s3_url, aws_access, aws_secret, bucket_name):
 def run_load_shifting():
     '''Parameter, die während des Pre-Processings der einzelnen Lastgangkurven bestimmt werden müssen'''
     config = Config()
+    logging.info("RUN LOAD SHIFTING")
+    logging.debug(f"CONFIG: {config}")
     mlflow.set_tracking_uri(config.MLFLOW_URL)
     exp_name = config.EXPERIMENT_NAME
     preprocessed_data = load_data(exp_name, config.DATA_SETTINGS.s3_url, config.DATA_SETTINGS.aws_access, config.DATA_SETTINGS.aws_secret, config.DATA_SETTINGS.bucket_name)
