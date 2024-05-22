@@ -1,6 +1,6 @@
-from toolbox.anomaly_detection.pipelines.custom_pipeline import AnomalyPipeline
-from toolbox.anomaly_detection.pipelines.cnn.cnn_autoencoder import Autoencoder
-from toolbox.anomaly_detection.pipelines.cnn.dataset import DataSet
+from toolbox.tasks.timeseries.anomaly.pipelines.custom_pipeline import AnomalyPipeline
+from toolbox.tasks.timeseries.anomaly.pipelines.cnn.cnn_autoencoder import Autoencoder
+from toolbox.tasks.timeseries.anomaly.pipelines.cnn.dataset import DataSet
 
 class CNNAnomalyPipeline(AnomalyPipeline):
     def __init__(
