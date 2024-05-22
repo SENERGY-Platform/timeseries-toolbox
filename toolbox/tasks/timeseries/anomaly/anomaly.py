@@ -1,6 +1,6 @@
-from tasks.timeseries.task import TimeSeriesTask
-from tasks.timeseries.anomaly.plots import plot_losses, plot_reconstructions
-from tasks.timeseries.anomaly.load import get_pipeline
+from toolbox.tasks.timeseries.task import TimeSeriesTask
+from toolbox.tasks.timeseries.anomaly.plots import plot_losses, plot_reconstructions
+from toolbox.tasks.timeseries.anomaly.load import get_pipeline
 import numpy as np 
 from sklearn.model_selection import train_test_split
 

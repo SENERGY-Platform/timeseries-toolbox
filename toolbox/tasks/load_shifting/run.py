@@ -12,7 +12,7 @@ from ray.air import session
 
 from toolbox.ml_config import Config
 from toolbox.data.loaders.s3.s3 import S3DataLoader
-from tasks.task import Task
+from toolbox.tasks.task import Task
 
 
 class LoadShifting(Task):
