@@ -1,8 +1,10 @@
 from toolbox.tasks.timeseries.task import TimeSeriesTask
 from toolbox.tasks.timeseries.anomaly.plots import plot_losses, plot_reconstructions
 from toolbox.tasks.timeseries.anomaly.load import get_pipeline
+from toolbox.model_registry import store_model
 import numpy as np 
 from sklearn.model_selection import train_test_split
+import ray
 
 QUANTILS = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98]
 
@@ -108,6 +110,13 @@ class AnomalyTask(TimeSeriesTask):
         pipeline = get_pipeline(model_name)(**train_config)
         train_data, validation_data = self.split_data(window_data)
         pipeline.fit(train_data, validation_data) 
+
+        # Log to MLFLOW
+        model_artifact_name = "TODO"
+        userid = "TODO"
+        experiment = "TODO"
+        commit = "TODO"
+        store_model(pipeline, userid, train_config, experiment, model_artifact_name, "anomaly", commit)
 
     def tune(self):
         # TODO: Parameter Tuning for a specfic model -> see parameter_tuning.py
