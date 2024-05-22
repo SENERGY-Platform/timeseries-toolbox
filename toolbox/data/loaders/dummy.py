@@ -1,6 +1,6 @@
 from darts.datasets import AirPassengersDataset
 
-from data.loaders.loader import DataLoader
+from toolbox.data.loaders.loader import DataLoader
 
 class DummyLoader(DataLoader):
     def __init__(self):
