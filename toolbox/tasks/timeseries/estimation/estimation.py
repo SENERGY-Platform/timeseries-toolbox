@@ -1,9 +1,9 @@
-from tasks.timeseries.estimation.metrics import calc_metrics
-from tasks.timeseries.estimation.plot import generate_plot
-from tasks.timeseries.task import TimeSeriesTask
-from data.splitter.splitter import Splitter
+from toolbox.tasks.timeseries.estimation.metrics import calc_metrics
+from toolbox.tasks.timeseries.estimation.plot import generate_plot
+from toolbox.tasks.timeseries.task import TimeSeriesTask
+from toolbox.data.splitter.splitter import Splitter
 
-from toolbox.estimation.load import get_pipeline
+from toolbox.tasks.timeseries.estimation.load import get_pipeline
 from darts import TimeSeries
 
 
