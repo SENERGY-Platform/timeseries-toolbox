@@ -1,7 +1,6 @@
 from tasks.timeseries.task import TimeSeriesTask
 from tasks.timeseries.anomaly.plots import plot_losses, plot_reconstructions
-
-from toolbox.anomaly_detection.load import get_pipeline
+from tasks.timeseries.anomaly.load import get_pipeline
 import numpy as np 
 from sklearn.model_selection import train_test_split
 
@@ -12,6 +11,7 @@ class AnomalyTask(TimeSeriesTask):
         super().__init__(task_settings.frequency)
         self.window_size = task_settings.window_size
         self.stride = task_settings.stride
+        self.task_settings = task_settings
 
     def fit_and_evaluate_model(self, train_data, test_data, config):
         # data: numpy array [NUMBER_SAMPLE x WINDOW_SIZE] 
@@ -98,3 +98,25 @@ class AnomalyTask(TimeSeriesTask):
 
     def get_pipeline_hyperparams(self, pipeline_name, train_ts):
         return get_pipeline(pipeline_name).get_hyperparams(self.frequency, train_ts, self.window_size)
+
+    def fit(self, window_data):
+        # Fit single model with specific parameters
+        train_config = self.task_settings.model_parameter
+        train_config['plot_enabled'] = False
+        train_config['out_dir'] = '.'
+        model_name = train_config['model_name']
+        pipeline = get_pipeline(model_name)(**train_config)
+        train_data, validation_data = self.split_data(window_data)
+        pipeline.fit(train_data, validation_data) 
+
+    def tune(self):
+        # TODO: Parameter Tuning for a specfic model -> see parameter_tuning.py
+        pass 
+
+    def select_best(self):
+        # TODO: Train and evaluate multiple models + parameter tuning -> see select_best_model.py
+        pass
+
+    def run(self, data_df):
+        window_data = self.convert_data(data_df)
+        self.fit(window_data)

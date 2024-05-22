@@ -33,6 +33,11 @@ class AnomalySettings:
     frequency: str 
     window_size: int
     stride: int
+    model_name: str
+    model_parameter = None 
+
+    def __init__(self) -> None:
+        self.model_parameter = json.loads(self.model_parameter)
 
 class Config:
     """Base config."""
