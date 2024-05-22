@@ -1,6 +1,6 @@
-from data.loaders.kafka.kafka import KafkaLoader
-from data.loaders.dummy import DummyLoader
-from ml_config import Config
+from toolbox.data.loaders.kafka.kafka import KafkaLoader
+from toolbox.data.loaders.dummy import DummyLoader
+from toolbox.ml_config import Config
 from toolbox.data.loaders.s3.s3 import S3DataLoader
 
 def get_data_loader(name, data_settings):
