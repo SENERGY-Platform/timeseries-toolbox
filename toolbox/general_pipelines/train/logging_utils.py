@@ -1,6 +1,3 @@
-import torch 
-from enum import Enum
-import wandb 
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
@@ -44,10 +41,9 @@ class ProgressMeter(object):
         print('\t'.join(entries))
 
         # Log to wandb
-        for meter in self.meters:
+        #for meter in self.meters:
             #wandb.log({meter.key: meter.val, index_name: index})
-            #wandb.log({f"average {meter.key}": meter.avg, index_name: index})
-            pass 
+            #wandb.log({f"average {meter.key}": meter.avg, index_name: index}) 
 
     def log_epoch(self, epoch_idx):
         prefix = f"Epoch: [{epoch_idx}]"
