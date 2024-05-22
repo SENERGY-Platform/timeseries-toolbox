@@ -1,6 +1,6 @@
-from toolbox.anomaly_detection.pipelines.custom_pipeline import AnomalyPipeline
-from toolbox.anomaly_detection.pipelines.trf.transformer import TransformerTimeSeriesEncoder
-from toolbox.anomaly_detection.pipelines.trf.dataset import WindowDataset
+from toolbox.tasks.timeseries.anomaly.pipelines.custom_pipeline import AnomalyPipeline
+from toolbox.tasks.timeseries.anomaly.pipelines.trf.transformer import TransformerTimeSeriesEncoder
+from toolbox.tasks.timeseries.anomaly.pipelines.trf.dataset import WindowDataset
 
 class TRFAnomalyPipeline(AnomalyPipeline):
     def __init__(
