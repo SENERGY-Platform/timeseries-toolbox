@@ -1,5 +1,4 @@
-from tasks.task import Task
-from data.preprocessors.consumption import ConsumptionPreProcessor
+from toolbox.tasks.task import Task
 
 class TimeSeriesTask(Task):
     def __init__(self, frequency) -> None:
