@@ -1,15 +1,11 @@
-from toolbox.tasks.timeseries.task import TimeSeriesTask
-from toolbox.tasks.timeseries.anomaly.plots import plot_losses, plot_reconstructions
-import numpy as np 
+from toolbox.anomaly.plots import plot_losses, plot_reconstructions 
 from sklearn.model_selection import train_test_split
-from toolbox.tasks.timeseries.anomaly.pipelines.cnn.pipeline import CNNAnomalyPipeline
-from toolbox.tasks.timeseries.anomaly.pipelines.trf.pipeline import TRFAnomalyPipeline
-from toolbox.model_selection.selection import train_best_models_and_test
-from toolbox.parameter_tuning.tune import run_hyperparameter_tuning_for_each_model
+from toolbox.anomaly.pipelines.cnn.pipeline import CNNAnomalyPipeline
+from toolbox.anomaly.pipelines.trf.pipeline import TRFAnomalyPipeline
 
 QUANTILS = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98]
 
-class AnomalyTask(TimeSeriesTask):
+class AnomalyTask():
     def __init__(self) -> None:
         super().__init__()
 

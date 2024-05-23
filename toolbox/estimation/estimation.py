@@ -1,13 +1,12 @@
-from toolbox.tasks.timeseries.estimation.metrics import calc_metrics
-from toolbox.tasks.timeseries.estimation.plot import generate_plot
-from toolbox.tasks.timeseries.task import TimeSeriesTask
+from toolbox.estimation.metrics import calc_metrics
+from toolbox.estimation.plot import generate_plot
 from toolbox.data.splitter.splitter import Splitter
 
-from toolbox.tasks.timeseries.estimation.load import get_pipeline
+from toolbox.estimation.load import get_pipeline
 from darts import TimeSeries
 
 
-class ConsumptionEstimationTask(TimeSeriesTask):
+class ConsumptionEstimationTask():
     def __init__(self, task_settings) -> None:
         super().__init__(task_settings.frequency)
 
