@@ -4,6 +4,7 @@ from toolbox.general_pipelines.inference.pipeline import InferencePipeline
 from torch.utils.data import DataLoader
 import torch 
 import mlflow
+import numpy as np
 
 class AnomalyPipeline(mlflow.pyfunc.PythonModel):
     def __init__(
@@ -16,7 +17,8 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         out_dir,
         early_stopping_patience,
         early_stopping_delta,
-        plot_enabled
+        plot_enabled,
+        window_length
     ):
         super().__init__()
         self.batch_size = batch_size
@@ -28,8 +30,11 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         self.early_stopping_patience = early_stopping_patience
         self.early_stopping_delta = early_stopping_delta
         self.plot_enabled = plot_enabled
+        self.window_length = window_length
 
     def fit(self, train_data, val_data):
+        train_data = self.convert_data(train_data)
+        val_data = self.convert_data(val_data)
         train_dataset = self.create_dataset(train_data)
         val_dataset = self.create_dataset(val_data)
 
@@ -67,6 +72,7 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         return self._predict(data)
 
     def _predict(self, data):
+        data = self.convert_data(data)
         test_dataset = self.create_dataset(data)
         dataloader = DataLoader(test_dataset, batch_size=64)
         pipeline = InferencePipeline(self.model, dataloader, self.loss)
@@ -81,3 +87,19 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
     
     def predict(self, context, data, params=None):
         return self._predict(data)    
+
+    def convert_data(self, data_df):
+        stride = 1 # TODO in task settings
+        values = list(data_df['value'])
+        windows = []
+
+        start = 0
+        end = self.window_length
+
+        while end < len(values):
+            window = values[start:end]
+            windows.append(window)
+            start += stride
+            end = start + self.window_length
+
+        return np.asarray(windows)

@@ -1,32 +1,30 @@
 from toolbox.tasks.timeseries.task import TimeSeriesTask
 from toolbox.tasks.timeseries.anomaly.plots import plot_losses, plot_reconstructions
-from toolbox.tasks.timeseries.anomaly.load import get_pipeline
-from toolbox.model_registry import store_model
 import numpy as np 
 from sklearn.model_selection import train_test_split
-import ray
+from toolbox.tasks.timeseries.anomaly.pipelines.cnn.pipeline import CNNAnomalyPipeline
+from toolbox.tasks.timeseries.anomaly.pipelines.trf.pipeline import TRFAnomalyPipeline
+from toolbox.model_selection.selection import train_best_models_and_test
+from toolbox.parameter_tuning.tune import run_hyperparameter_tuning_for_each_model
 
 QUANTILS = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98]
 
 class AnomalyTask(TimeSeriesTask):
-    def __init__(self, task_settings) -> None:
-        super().__init__(task_settings.frequency)
-        self.window_size = task_settings.window_size
-        self.stride = task_settings.stride
-        self.task_settings = task_settings
+    def __init__(self) -> None:
+        super().__init__()
 
-    def fit_and_evaluate_model(self, train_data, test_data, config):
+    def get_pipeline(self, pipeline_name):
+        if pipeline_name == "transformer":
+            return TRFAnomalyPipeline
+        elif pipeline_name == "cnn":
+            return CNNAnomalyPipeline
+
+    def fit_and_evaluate_model(self, train_data, test_data, config, model_name):
         # data: numpy array [NUMBER_SAMPLE x WINDOW_SIZE] 
 
-        pipeline_name = config['pipeline']
-
-        # Remove pipeline name to pass remaining configs as model parameters
-        del config['pipeline']
-        del config['freq']
-        config['window_length'] = self.window_size
         config['plot_enabled'] = False
-        
-        pipeline = get_pipeline(pipeline_name)(**config)
+        config['out_dir'] = '.'
+        pipeline = self.get_pipeline(model_name)(**config)
 
         train_data, validation_data = self.split_data(train_data)
         pipeline.fit(train_data, validation_data)
@@ -80,52 +78,8 @@ class AnomalyTask(TimeSeriesTask):
 
         return pipeline, metrics, plots
 
-    def convert_data(self, data_df):
-        values = list(data_df['value'])
-        windows = []
-
-        start = 0
-        end = self.window_size
-
-        while end < len(values):
-            window = values[start:end]
-            windows.append(window)
-            start += self.stride
-            end = start + self.window_size
-
-        return np.asarray(windows)
-
     def split_data(self, data):
         return train_test_split(data, shuffle=True, test_size=0.25)
 
     def get_pipeline_hyperparams(self, pipeline_name, train_ts):
-        return get_pipeline(pipeline_name).get_hyperparams(self.frequency, train_ts, self.window_size)
-
-    def fit(self, window_data):
-        # Fit single model with specific parameters
-        train_config = self.task_settings.model_parameter
-        train_config['plot_enabled'] = False
-        train_config['out_dir'] = '.'
-        model_name = train_config['model_name']
-        pipeline = get_pipeline(model_name)(**train_config)
-        train_data, validation_data = self.split_data(window_data)
-        pipeline.fit(train_data, validation_data) 
-
-        # Log to MLFLOW
-        model_artifact_name = "TODO"
-        userid = "TODO"
-        experiment = "TODO"
-        commit = "TODO"
-        store_model(pipeline, userid, train_config, experiment, model_artifact_name, "anomaly", commit)
-
-    def tune(self):
-        # TODO: Parameter Tuning for a specfic model -> see parameter_tuning.py
-        pass 
-
-    def select_best(self):
-        # TODO: Train and evaluate multiple models + parameter tuning -> see select_best_model.py
-        pass
-
-    def run(self, data_df):
-        window_data = self.convert_data(data_df)
-        self.fit(window_data)
+        return self.get_pipeline(pipeline_name).get_hyperparams(self.frequency, train_ts, self.window_size)

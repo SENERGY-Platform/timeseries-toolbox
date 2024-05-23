@@ -1,6 +1,6 @@
 from os import environ
 import uuid 
-
+import typing 
 from dataclasses import dataclass
 import json
 
@@ -34,7 +34,7 @@ class AnomalySettings:
     window_size: int
     stride: int
     model_name: str
-    model_parameter = None 
+    model_parameter: typing.Any = None 
 
     def __init__(self) -> None:
         self.model_parameter = json.loads(self.model_parameter)

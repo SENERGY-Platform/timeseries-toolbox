@@ -28,10 +28,10 @@ class TRFAnomalyPipeline(AnomalyPipeline):
             out_dir,
             early_stopping_patience,
             early_stopping_delta,
-            plot_enabled
+            plot_enabled,
+            window_length
         )
 
-        self.window_length = window_length
         self.sequence_length = max(window_length * 0.1, 1) # 10th of the complete window as tokens - minimum one step
         self.token_emb_dim = int(window_length / self.sequence_length)
 
