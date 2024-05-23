@@ -34,7 +34,7 @@ class AnomalySettings:
     window_size: int
     stride: int
     model_name: str
-    model_parameter: typing.Any = None 
+    model_parameter: 'typing.Any' = None 
 
     def __init__(self) -> None:
         self.model_parameter = json.loads(self.model_parameter)
