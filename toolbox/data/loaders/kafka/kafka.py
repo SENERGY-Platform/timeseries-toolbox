@@ -9,10 +9,10 @@ from toolbox.ml_config import KafkaTopicConfiguration
 from toolbox.data.loaders.loader import DataLoader
 
 class KafkaLoader(DataLoader):
-    def __init__(self, ksql_server_url, topic_config: KafkaTopicConfiguration, experiment_name):
+    def __init__(self, config: KafkaTopicConfiguration, experiment_name):
        self.stream_name = f'{experiment_name}{str(uuid.uuid4().hex)}'
-       self.topic_config = topic_config
-       self.ksql_server_url = ksql_server_url
+       self.topic_config = config
+       self.ksql_server_url = config.ksql_url
        self.builder = Builder()
        self.connect()
 

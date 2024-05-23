@@ -7,7 +7,7 @@ def get_data_loader(name, data_settings):
     if name == "kafka":
         config = Config()
         experiment_name = config.EXPERIMENT_NAME
-        return KafkaLoader(config.KSQL_SERVER_URL, data_settings, experiment_name)
+        return KafkaLoader(data_settings, experiment_name)
     elif name == "dummy":
         return DummyLoader()
     elif name == 's3':
