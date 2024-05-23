@@ -1,7 +1,7 @@
 import mlflow
 import mlflow.pyfunc
 
-def store_model(checkpoint, userid, config, experiment, model_artifact_name, task, commit):
+def store_model(checkpoint, userid, config, experiment, model_artifact_name, commit):
     print('store model')
     model_artifact = checkpoint.to_dict()['model']
     print(model_artifact.quantil)
@@ -23,7 +23,6 @@ def store_model(checkpoint, userid, config, experiment, model_artifact_name, tas
     model_uri = f"runs:/{run.info.run_id}/{run_relative_artifcat_path}"
     tags = {
         "userid": userid,
-        "task": task,
         "commit": commit
     }
     tags.update(config)

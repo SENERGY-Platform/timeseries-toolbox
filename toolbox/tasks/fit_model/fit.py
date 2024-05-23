@@ -1,5 +1,5 @@
 from toolbox.tasks.task import Task
-from toolbox.tasks.timeseries.anomaly.anomaly import AnomalyTask
+from toolbox.anomaly.anomaly import AnomalyTask
 from toolbox.model_registry import store_model
 
 class Fit(Task):
@@ -19,4 +19,4 @@ class Fit(Task):
         userid = "TODO"
         experiment = "TODO"
         commit = "TODO"
-        store_model(pipeline, userid, train_config, experiment, model_artifact_name, "anomaly", commit)
+        store_model(pipeline, userid, train_config, experiment, model_artifact_name, commit)
