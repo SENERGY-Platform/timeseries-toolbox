@@ -24,13 +24,10 @@ class S3Configuration:
     aws_access: str = None
     file_name: str = None
 
+@dataclass
 class MLSettings:
     model_name: str
     model_parameter: 'typing.Any' = None 
-
-    def __init__(self, model_name, model_parameter) -> None:
-        self.model_parameter = json.loads(model_parameter)
-        self.model_name = model_name
 
 class Config:
     """Base config."""
