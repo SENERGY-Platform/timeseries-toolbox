@@ -30,7 +30,7 @@ class KafkaLoader(DataLoader):
         create_containers = [
             CreateContainer(path=self.topic_config.path_to_time, type="STRING"), 
             CreateContainer(path=self.topic_config.path_to_value, type="DOUBLE"), 
-            CreateContainer(path="device_id", type="STRING")
+            CreateContainer(path=self.topic_config.filterType, type="STRING")
         ]
         query = self.builder.build_create_stream_query(stream_name, self.topic_config.name, create_containers)
         print(f"create unnesting query: {query}")
