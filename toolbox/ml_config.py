@@ -24,13 +24,13 @@ class S3Configuration:
     aws_access: str = None
     file_name: str = None
 
-@dataclass
-class TaskSettings:
+class MLSettings:
     model_name: str
     model_parameter: 'typing.Any' = None 
 
-    def __init__(self) -> None:
-        self.model_parameter = json.loads(self.model_parameter)
+    def __init__(self, model_name, model_parameter) -> None:
+        self.model_parameter = json.loads(model_parameter)
+        self.model_name = model_name
 
 class Config:
     """Base config."""
@@ -68,4 +68,5 @@ class Config:
             
     def parse_task_settings(self, task_settings):
         task_settings = json.loads(task_settings)
-        self.TASK_SETTINGS = TaskSettings(**task_settings)
+        if self.TASK == 'ml_fit':
+            self.TASK_SETTINGS = MLSettings(**task_settings)
