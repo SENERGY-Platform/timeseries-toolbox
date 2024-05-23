@@ -3,7 +3,6 @@ from torch import nn
 from toolbox.general_pipelines.train.logging_utils import AverageMeter, ProgressMeter
 from toolbox.general_pipelines.train.stopping import EarlyStopping
 import torch 
-import similaritymeasures
 import matplotlib.pyplot as plt 
 from os.path import join as pjoin 
 
