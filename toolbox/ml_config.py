@@ -25,14 +25,7 @@ class S3Configuration:
     file_name: str = None
 
 @dataclass
-class EstimationSettings:
-    frequency: str 
-
-@dataclass
-class AnomalySettings:
-    frequency: str 
-    window_size: int
-    stride: int
+class TaskSettings:
     model_name: str
     model_parameter: 'typing.Any' = None 
 
@@ -75,7 +68,4 @@ class Config:
             
     def parse_task_settings(self, task_settings):
         task_settings = json.loads(task_settings)
-        if self.TASK == "anomaly":
-            self.TASK_SETTINGS = AnomalySettings(**task_settings)
-        elif self.TASK == "estimation":
-            self.TASK_SETTINGS = EstimationSettings(**task_settings)
+        self.TASK_SETTINGS = TaskSettings(**task_settings)
