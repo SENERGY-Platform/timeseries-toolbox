@@ -7,13 +7,14 @@ import json
 @dataclass
 class KafkaTopicConfiguration:
     """"""
-    name: str = None
-    filterType: str = None
-    filterValue: str = None
-    path_to_time: str = None
+    name: str = None # Kafka Topic usually something like urn_infai_ses_service_be11781a-aaed-4dbb-9824-3f4e188724ec remember underscores!
+    filterType: str = None # device_id, operator_id
+    filterValue: str = None # Usually device id like urn:infai:ses:device:449bed81-df72-4754-a9ba-df2873046734
+    path_to_time: str = None # full path to the time field, usually like value.energy.lastUpdate. Remember `value` for devices
     path_to_value: str = None
     experiment_name: str = None
     ksql_url: str = None
+    timestamp_format: str = None
 
 @dataclass
 class S3Configuration:
