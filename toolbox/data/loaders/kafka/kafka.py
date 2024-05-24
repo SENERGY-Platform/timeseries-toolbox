@@ -51,22 +51,28 @@ class KafkaLoader(DataLoader):
         self.client.ksql(query)
         return stream_name
 
+    def calc_unix_ts_ms(self, time_value, level):
+        return pd.Timedelta(time_value, level).total_seconds() * 1000
 
-    def build_select_query(self, stream_name):
+    def build_select_query(self, stream_name, time_value, time_level):
         # Build the `SELECT` query and filter for device ID and time range
         query = f"""SELECT {self.topic_config.filterType}, {TIME_COLUMN}, {VALUE_COLUMN} FROM {stream_name}"""
         query += f" WHERE {self.topic_config.filterType} = '{self.topic_config.filterValue}'"
+
+        unix_ts_first_point = self.calc_unix_ts_ms(time_value, time_level)
+        query += f" AND UNIX_TIMESTAMP({TIME_COLUMN}) > UNIX_TIMESTAMP()-{unix_ts_first_point}"
         print(f"create select query: {query}")
         return query
 
     def get_data(self):
+        # Get data from a stream based on 
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
 
         result_list = []
 
         try:
-            select_query = self.build_select_query(stream_name)
+            select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
             result = self.client.query(select_query)
             for item in result:
                 result_list.append(item)    

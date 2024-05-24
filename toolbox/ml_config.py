@@ -15,6 +15,8 @@ class KafkaTopicConfiguration:
     experiment_name: str = None
     ksql_url: str = None
     timestamp_format: str = None
+    time_range_value: str = None 
+    time_range_level: str = None
 
 @dataclass
 class S3Configuration:
