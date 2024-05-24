@@ -46,7 +46,8 @@ class KafkaLoader(DataLoader):
             SelectContainer(column_name=VALUE_COLUMN, path=self.topic_config.path_to_value)
         ]
         select_query = self.builder.build_select_query(unnesting_stream_name, select_containers)
-        query = f"CREATE STREAM {stream_name} WITH (KAFKA_TOPIC='{unnesting_stream_name}', timestamp='{TIME_COLUMN}', timestamp_format='{self.topic_config.timestamp_format}', partitions=1, VALUE_FORMAT='json') AS {select_query}"
+        ts_format = self.topic_config.timestamp_format.replace('T', "''T''")
+        query = f"CREATE STREAM {stream_name} WITH (KAFKA_TOPIC='{unnesting_stream_name}', timestamp='{TIME_COLUMN}', timestamp_format='{ts_format}', partitions=1, VALUE_FORMAT='json') AS {select_query}"
         print(f"create flattened stream query: {query}")
         self.client.ksql(query)
         return stream_name

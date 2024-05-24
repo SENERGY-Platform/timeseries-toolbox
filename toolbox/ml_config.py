@@ -15,8 +15,8 @@ class KafkaTopicConfiguration:
     experiment_name: str = None
     ksql_url: str = None
     timestamp_format: str = None
-    time_range_value: str = None 
-    time_range_level: str = None
+    time_range_value: int = None # Any number 
+    time_range_level: str = None # Any duration string supported by pandas.Timedelta()
 
 @dataclass
 class S3Configuration:
