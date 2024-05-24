@@ -14,7 +14,7 @@ class KafkaTopicConfiguration:
     path_to_value: str = None
     experiment_name: str = None
     ksql_url: str = None
-    timestamp_format: str = None
+    timestamp_format: str = None # Time stamp format, Usually `yyyy-MM-ddTHH:mm:ss.sssZ`. Must be supported by Java See: https://www.baeldung.com/java-format-localdate-iso-8601-t-z
     time_range_value: int = None # Any number 
     time_range_level: str = None # Any duration string supported by pandas.Timedelta()
 

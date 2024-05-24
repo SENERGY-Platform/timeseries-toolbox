@@ -46,14 +46,14 @@ class KafkaLoader(DataLoader):
             SelectContainer(column_name=VALUE_COLUMN, path=self.topic_config.path_to_value)
         ]
         select_query = self.builder.build_select_query(unnesting_stream_name, select_containers)
-        ts_format = self.topic_config.timestamp_format.replace('T', "''T''").replace('Z', "''Z''")
+        ts_format = self.topic_config.timestamp_format.replace('T', "''T''").replace('Z', "''Z''") # KSQL requires T and Z to be escaped
         query = f"CREATE STREAM {stream_name} WITH (KAFKA_TOPIC='{unnesting_stream_name}', timestamp='{TIME_COLUMN}', timestamp_format='{ts_format}', partitions=1, VALUE_FORMAT='json') AS {select_query}"
         print(f"create flattened stream query: {query}")
         self.client.ksql(query)
         return stream_name
 
     def calc_unix_ts_ms(self, time_value, level):
-        return pd.Timedelta(time_value, level).total_seconds() * 1000
+        return pd.Timedelta(float(time_value), level).total_seconds() * 1000
 
     def build_select_query(self, stream_name, time_value, time_level):
         # Build the `SELECT` query and filter for device ID and time range
