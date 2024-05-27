@@ -73,6 +73,7 @@ class KafkaLoader(DataLoader):
         # 2. Create a second stream that uses flat colums for time and value
         # 3. Select from the stream
         
+        self.set_offset_earliest()
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
 
