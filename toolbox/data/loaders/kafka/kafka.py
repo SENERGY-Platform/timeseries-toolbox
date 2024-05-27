@@ -56,7 +56,7 @@ class KafkaLoader(DataLoader):
         return stream_name
 
     def calc_unix_ts_ms(self, time_value, level):
-        return pd.Timedelta(float(time_value), level).total_seconds() * 1000
+        return round(pd.Timedelta(float(time_value), level).total_seconds() * 1000)
 
     def build_select_query(self, stream_name, time_value, time_level):
         # Build the `SELECT` query and filter for device ID and time range
@@ -72,7 +72,7 @@ class KafkaLoader(DataLoader):
         # Creates a DataFrame with columns: time, value 
         # Data is queried via KSQL from Kafka directly
         # 1. Create a stream to access the nested time and value fields
-        # 2. Create a second stream that uses flat colums for time and value
+        # 2. Create a second stream that uses flat colums for time and value (this is needed as setting the time column is not possible on nested fields)
         # 3. Select from the stream
         
         unnesting_stream_name = self.create_unnesting_stream()
@@ -80,24 +80,25 @@ class KafkaLoader(DataLoader):
 
         result_list = []
 
+        select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
+        result = self.client.query(select_query, stream_properties=self.stream_properties)
+        for item in result:
+            result_list.append(item)  
         try:
-            select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
-            result = self.client.query(select_query, stream_properties=self.stream_properties)
-            for item in result:
-                result_list.append(item)    
+            pass  
         except Exception as e:
             print(e)
             print('Iteration done')
         
         print(f"RETRIEVED DATA: {result_list}")
-        
+
+        self.remove_stream(stream_name)
+        self.remove_stream(unnesting_stream_name)
+
         data = self.clean_ksql_response(result_list)
         self.data = self.convert_result_to_dataframe(data)
         if self.data.empty:
             raise Exception("DataFrame is empty. Check the query.")
-
-        self.remove_stream(stream_name)
-        self.remove_stream(unnesting_stream_name)
         
         return self.data
 
