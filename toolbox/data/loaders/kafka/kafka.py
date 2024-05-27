@@ -95,7 +95,7 @@ class KafkaLoader(DataLoader):
     def query_data(self, query):
         res = httpx.post(self.ksql_server_url + "/query-stream", data=json.dumps({
             "sql": query,
-            "properties": self.stream_properties
+            "streamsProperties": self.stream_properties
         }), timeout=30, headers={'Accept': 'application/json'})
         if res.status_code != httpx.codes.OK:
             raise Exception(f"Could not query data: {res.text}")
@@ -103,8 +103,8 @@ class KafkaLoader(DataLoader):
 
     def run_command(self, command):
         res = httpx.post(self.ksql_server_url + "/ksql", data=json.dumps({
-            "sql": command,
-            "properties": self.stream_properties
+            "ksql": command,
+            "streamsProperties": self.stream_properties
         }), timeout=30, headers={'Accept': 'application/json'})
         if res.status_code != httpx.codes.OK:
             raise Exception(f"Could not run command: {res.text}")
