@@ -20,6 +20,7 @@ class KafkaLoader(DataLoader):
     def __init__(self, config: KafkaTopicConfiguration, experiment_name):
        self.topic_config = config
        self.ksql_server_url = config.ksql_url
+       self.builder = Builder()
        self.stream_properties = {"ksql.streams.auto.offset.reset": "earliest"} # To query data from the beginning of the topic
 
     def create_unnesting_stream(self):
