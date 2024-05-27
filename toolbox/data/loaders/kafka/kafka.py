@@ -2,7 +2,6 @@ import uuid
 import json 
 import httpx
 
-from ksql import KSQLAPI
 import pandas as pd 
 from ksql_query_builder import Builder, SelectContainer, CreateContainer
 
@@ -21,12 +20,7 @@ class KafkaLoader(DataLoader):
     def __init__(self, config: KafkaTopicConfiguration, experiment_name):
        self.topic_config = config
        self.ksql_server_url = config.ksql_url
-       self.builder = Builder()
-       self.connect()
        self.stream_properties = {"ksql.streams.auto.offset.reset": "earliest"} # To query data from the beginning of the topic
-
-    def connect(self):
-        self.client = KSQLAPI(self.ksql_server_url)
 
     def create_unnesting_stream(self):
         # Build the `CREATE STREAM` query to access the nested value and time fields
