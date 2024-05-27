@@ -65,7 +65,7 @@ class KafkaLoader(DataLoader):
         query += f" WHERE {self.topic_config.filterType} = '{self.topic_config.filterValue}'"
 
         unix_ts_first_point = self.calc_unix_ts_ms(time_value, time_level)
-        query += f" AND UNIX_TIMESTAMP({TIME_COLUMN}) > UNIX_TIMESTAMP()-{unix_ts_first_point}"
+        query += f" AND UNIX_TIMESTAMP({TIME_COLUMN}) > UNIX_TIMESTAMP()-{unix_ts_first_point};"
         print(f"create select query: {query}")
         return query
 
@@ -78,9 +78,6 @@ class KafkaLoader(DataLoader):
         
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
-
-        result_list = []
-
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
