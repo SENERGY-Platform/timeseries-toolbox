@@ -1,5 +1,6 @@
 import uuid
 import json 
+import httpx
 
 from ksql import KSQLAPI
 import pandas as pd 
@@ -81,49 +82,38 @@ class KafkaLoader(DataLoader):
         result_list = []
 
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
-        result = self.client.query(select_query, stream_properties=self.stream_properties, use_http2=True)
-        for item in result:
-            print(item)
-            result_list.append(item)  
-        try:
-            pass  
-        except Exception as e:
-            print(e)
-            print('Iteration done')
+        result = self.query_data(select_query)
         
-        print(f"RETRIEVED DATA: {result_list}")
+        print(f"RETRIEVED DATA: {result}")
 
         self.remove_stream(stream_name)
         self.remove_stream(unnesting_stream_name)
 
-        data = self.clean_ksql_response(result_list)
-        self.data = self.convert_result_to_dataframe(data)
+        self.data = self.convert_result_to_dataframe(result)
         if self.data.empty:
             raise Exception("DataFrame is empty. Check the query.")
         
         return self.data
+    
+    def query_data(self, query):
+        res = httpx.post(self.ksql_server_url + "/query-stream", data=json.dumps({
+            "sql": query,
+            "properties": {             
+                "ksql.streams.auto.offset.reset": "earliest"
+            }
+        }), timeout=30, headers={'Accept': 'application/json'})
+        return res.json()
 
     def remove_stream(self, stream_name):
         drop_stream_query = f'DROP STREAM {stream_name}' 
         print(f"drop query: {drop_stream_query}")
         self.client.ksql(drop_stream_query)
     
-    def clean_ksql_response(self, response):
-        # Strip off first and last info messages
-        data = []
-        response = response[1:-1]
-        for item in response:
-            item = item.replace(",\n", "")
-            item = json.loads(item)
-            data.append(item)
-        return data 
-
     def convert_result_to_dataframe(self, result):
         rows = []
-        for row in result:
-            values = row['row']['columns']
-            time = values[0]
-            value = values[1]
+        for row in result[1:]: # first row contains query id and column metadata
+            time = row[0]
+            value = row[1]
             rows.append({'time': time, 'value': value})
         df = pd.DataFrame(rows)
         return df
