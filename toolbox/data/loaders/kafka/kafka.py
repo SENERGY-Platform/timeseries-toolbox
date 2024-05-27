@@ -17,14 +17,11 @@ class KafkaLoader(DataLoader):
        self.ksql_server_url = config.ksql_url
        self.builder = Builder()
        self.connect()
+       self.stream_properties = {"ksql.streams.auto.offset.reset": "earliest"} # To query data from the beginning of the topic
 
     def connect(self):
         self.client = KSQLAPI(self.ksql_server_url)
 
-    def set_offset_earliest(self):
-        # To query data from the beginning of the topic
-        self.client.ksql("SET 'auto.offset.reset'='earliest'")
-    
     def create_unnesting_stream(self):
         # Build the `CREATE STREAM` query to access the nested value and time fields
         stream_name = str(uuid.uuid4().hex)
@@ -35,7 +32,7 @@ class KafkaLoader(DataLoader):
         ]
         query = self.builder.build_create_stream_query(stream_name, self.topic_config.name, create_containers)
         print(f"create unnesting query: {query}")
-        self.client.ksql(query)
+        self.client.ksql(query, self.stream_properties)
         return stream_name
 
     def create_stream(self, unnesting_stream_name):
@@ -50,7 +47,7 @@ class KafkaLoader(DataLoader):
         ts_format = self.topic_config.timestamp_format.replace('T', "''T''").replace('Z', "''Z''") # KSQL requires T and Z to be escaped
         query = f"CREATE STREAM {stream_name} WITH (timestamp='{TIME_COLUMN}', timestamp_format='{ts_format}') AS {select_query}"
         print(f"create flattened stream query: {query}")
-        self.client.ksql(query)
+        self.client.ksql(query, self.stream_properties)
         return stream_name
 
     def calc_unix_ts_ms(self, time_value, level):
@@ -73,7 +70,6 @@ class KafkaLoader(DataLoader):
         # 2. Create a second stream that uses flat colums for time and value
         # 3. Select from the stream
         
-        self.set_offset_earliest()
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
 
@@ -81,7 +77,7 @@ class KafkaLoader(DataLoader):
 
         try:
             select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
-            result = self.client.query(select_query)
+            result = self.client.query(select_query, stream_properties=self.stream_properties)
             for item in result:
                 result_list.append(item)    
         except Exception as e:
@@ -93,11 +89,16 @@ class KafkaLoader(DataLoader):
         if self.data.empty:
             raise Exception("DataFrame is empty. Check the query.")
 
-        drop_stream_query = f'DROP STREAM {self.stream_name}' 
-        print(f"drop query: {drop_stream_query}")
-        self.client.ksql(drop_stream_query)
+        self.remove_stream(stream_name)
+        self.remove_stream(unnesting_stream_name)
+        
         return self.data
 
+    def remove_stream(self, stream_name):
+        drop_stream_query = f'DROP STREAM {stream_name}' 
+        print(f"drop query: {drop_stream_query}")
+        self.client.ksql(drop_stream_query)
+    
     def clean_ksql_response(self, response):
         # Strip off first and last info messages
         data = []
