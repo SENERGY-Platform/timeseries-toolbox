@@ -81,9 +81,9 @@ class KafkaLoader(DataLoader):
         result_list = []
 
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
-        result = self.client.query(select_query, stream_properties=self.stream_properties, return_objects=True)
-        print(result)
+        result = self.client.query(select_query, stream_properties=self.stream_properties, use_http2=True)
         for item in result:
+            print(item)
             result_list.append(item)  
         try:
             pass  
