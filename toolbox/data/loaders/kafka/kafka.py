@@ -1,6 +1,7 @@
 import uuid
 import json 
 import httpx
+import time 
 
 import pandas as pd 
 from ksql_query_builder import Builder, SelectContainer, CreateContainer
@@ -73,6 +74,7 @@ class KafkaLoader(DataLoader):
         
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
+        time.sleep(5)
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
@@ -105,7 +107,7 @@ class KafkaLoader(DataLoader):
             raise Exception(f"Could not run command: {res.text}")
 
     def remove_stream(self, stream_name):
-        drop_stream_query = f'DROP STREAM {stream_name}' 
+        drop_stream_query = f'DROP STREAM {stream_name};' 
         print(f"drop query: {drop_stream_query}")
         self.run_command(drop_stream_query)
     
