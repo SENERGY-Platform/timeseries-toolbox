@@ -20,6 +20,10 @@ class KafkaLoader(DataLoader):
 
     def connect(self):
         self.client = KSQLAPI(self.ksql_server_url)
+
+    def set_offset_earliest(self):
+        # To query data from the beginning of the topic
+        self.client.ksql("SET 'auto.offset.reset' = 'earliest';")
     
     def create_unnesting_stream(self):
         # Build the `CREATE STREAM` query to access the nested value and time fields
