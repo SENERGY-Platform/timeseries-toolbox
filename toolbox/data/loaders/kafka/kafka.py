@@ -107,7 +107,7 @@ class KafkaLoader(DataLoader):
     def remove_stream(self, stream_name):
         drop_stream_query = f'DROP STREAM {stream_name}' 
         print(f"drop query: {drop_stream_query}")
-        self.client.ksql(drop_stream_query)
+        self.run_command(drop_stream_query)
     
     def convert_result_to_dataframe(self, result):
         rows = []
