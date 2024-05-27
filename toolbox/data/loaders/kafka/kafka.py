@@ -36,9 +36,9 @@ class KafkaLoader(DataLoader):
             CreateContainer(path=self.topic_config.path_to_value, type="DOUBLE"), 
             CreateContainer(path=self.topic_config.filterType, type="STRING")
         ]
-        query = self.builder.build_create_stream_query(stream_name, self.topic_config.name, create_containers)
+        query = self.builder.build_create_stream_query(stream_name, self.topic_config.name, create_containers) + ";"
         print(f"create unnesting query: {query}")
-        self.client.ksql(query, self.stream_properties)
+        self.run_command(query)
         return stream_name
 
     def create_stream(self, unnesting_stream_name):
@@ -51,9 +51,9 @@ class KafkaLoader(DataLoader):
         ]
         select_query = self.builder.build_select_query(unnesting_stream_name, select_containers)
         ts_format = self.topic_config.timestamp_format.replace('T', "''T''").replace('Z', "''Z''") # KSQL requires T and Z to be escaped
-        query = f"CREATE STREAM {stream_name} WITH (timestamp='{TIME_COLUMN}', timestamp_format='{ts_format}') AS {select_query}"
+        query = f"CREATE STREAM {stream_name} WITH (timestamp='{TIME_COLUMN}', timestamp_format='{ts_format}') AS {select_query};"
         print(f"create flattened stream query: {query}")
-        self.client.ksql(query, self.stream_properties)
+        self.run_command(query)
         return stream_name
 
     def calc_unix_ts_ms(self, time_value, level):
@@ -95,11 +95,19 @@ class KafkaLoader(DataLoader):
     def query_data(self, query):
         res = httpx.post(self.ksql_server_url + "/query-stream", data=json.dumps({
             "sql": query,
-            "properties": {             
-                "ksql.streams.auto.offset.reset": "earliest"
-            }
+            "properties": self.stream_properties
         }), timeout=30, headers={'Accept': 'application/json'})
+        if res.status_code != httpx.codes.OK:
+            raise Exception(f"Could not query data: {res.text}")
         return res.json()
+
+    def run_command(self, command):
+        res = httpx.post(self.ksql_server_url + "/ksql", data=json.dumps({
+            "sql": command,
+            "properties": self.stream_properties
+        }), timeout=30, headers={'Accept': 'application/json'})
+        if res.status_code != httpx.codes.OK:
+            raise Exception(f"Could not run command: {res.text}")
 
     def remove_stream(self, stream_name):
         drop_stream_query = f'DROP STREAM {stream_name}' 
