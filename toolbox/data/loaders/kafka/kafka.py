@@ -11,6 +11,11 @@ from toolbox.data.loaders.loader import DataLoader
 TIME_COLUMN = "time"
 VALUE_COLUMN = "value"
 
+# EXAMPLE QUERIES
+# CREATE STREAM hannes21 (device_id STRING, value STRUCT<root STRUCT<energy DOUBLE, time STRING>>) WITH (kafka_topic='urn_infai_ses_service_16e21f0a-19b4-4e5a-9247-5917ec9a4124', value_format='json', partitions=1);
+# CREATE STREAM hannes22 WITH (timestamp='time', timestamp_format='yyyy-MM-dd''T''HH:mm:ss') AS SELECT device_id as device_id, value->root->time as time, value->root->energy as value FROM hannes21
+# SELECT device_id, time, value FROM hannes22 WHERE device_id = 'urn:infai:ses:device:c2ac40ef-662b-4791-b0e5-a6b94f8c59ae' AND UNIX_TIMESTAMP(time) > UNIX_TIMESTAMP()-172800000.0
+
 class KafkaLoader(DataLoader):
     def __init__(self, config: KafkaTopicConfiguration, experiment_name):
        self.topic_config = config
@@ -83,6 +88,8 @@ class KafkaLoader(DataLoader):
         except Exception as e:
             print(e)
             print('Iteration done')
+        
+        print(f"RETRIEVED DATA: {result_list}")
         
         data = self.clean_ksql_response(result_list)
         self.data = self.convert_result_to_dataframe(data)
