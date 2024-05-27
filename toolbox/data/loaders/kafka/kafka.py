@@ -12,9 +12,6 @@ TIME_COLUMN = "time"
 VALUE_COLUMN = "value"
 
 class KafkaLoader(DataLoader):
-    # Creates a DataFrame with columns: time, value 
-    # Data is queried via KSQL from Kafka directly
-
     def __init__(self, config: KafkaTopicConfiguration, experiment_name):
        self.topic_config = config
        self.ksql_server_url = config.ksql_url
@@ -47,7 +44,7 @@ class KafkaLoader(DataLoader):
         ]
         select_query = self.builder.build_select_query(unnesting_stream_name, select_containers)
         ts_format = self.topic_config.timestamp_format.replace('T', "''T''").replace('Z', "''Z''") # KSQL requires T and Z to be escaped
-        query = f"CREATE STREAM {stream_name} WITH (KAFKA_TOPIC='{unnesting_stream_name}', timestamp='{TIME_COLUMN}', timestamp_format='{ts_format}', partitions=1, VALUE_FORMAT='json') AS {select_query}"
+        query = f"CREATE STREAM {stream_name} WITH (timestamp='{TIME_COLUMN}', timestamp_format='{ts_format}') AS {select_query}"
         print(f"create flattened stream query: {query}")
         self.client.ksql(query)
         return stream_name
@@ -66,7 +63,12 @@ class KafkaLoader(DataLoader):
         return query
 
     def get_data(self):
-        # Get data from a stream based on 
+        # Creates a DataFrame with columns: time, value 
+        # Data is queried via KSQL from Kafka directly
+        # 1. Create a stream to access the nested time and value fields
+        # 2. Create a second stream that uses flat colums for time and value
+        # 3. Select from the stream
+        
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
 
