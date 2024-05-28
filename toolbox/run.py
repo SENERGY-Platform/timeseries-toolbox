@@ -16,4 +16,4 @@ def run():
     task = get_task(task_name, task_settings)
     data_df = get_data(data_loader_name, data_settings)
 
-    task.run(data_df, task_settings)
+    task.run(data_df)
