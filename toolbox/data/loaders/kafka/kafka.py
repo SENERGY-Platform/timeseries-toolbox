@@ -57,7 +57,7 @@ class KafkaLoader(DataLoader):
 
     def build_select_query(self, stream_name, time_value, time_level):
         # Build the `SELECT` query and filter for device ID and time range
-        query = f"""SELECT {self.topic_config.filterType}, {TIME_COLUMN}, {VALUE_COLUMN} FROM {stream_name}"""
+        query = f"""SELECT {TIME_COLUMN}, {VALUE_COLUMN} FROM {stream_name}"""
         query += f" WHERE {self.topic_config.filterType} = '{self.topic_config.filterValue}'"
 
         unix_ts_first_point = self.calc_unix_ts_ms(time_value, time_level)
@@ -74,7 +74,7 @@ class KafkaLoader(DataLoader):
         
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
-        time.sleep(5)
+        time.sleep(30)
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
