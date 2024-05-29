@@ -88,9 +88,9 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
     def predict(self, context, data, params=None):
         return self._predict(data)    
 
-    def convert_data(self, data_df):
+    def convert_data(self, data_series):
         stride = 1 # TODO in task settings
-        values = list(data_df['value'])
+        values = list(data_series)
         windows = []
 
         start = 0

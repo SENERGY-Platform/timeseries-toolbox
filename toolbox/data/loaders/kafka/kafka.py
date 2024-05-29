@@ -83,9 +83,9 @@ class KafkaLoader(DataLoader):
         self.remove_stream(stream_name)
         self.remove_stream(unnesting_stream_name)
 
-        self.data = self.convert_result_to_dataframe(result)
+        self.data = self.convert_result_to_series(result)
         if self.data.empty:
-            raise Exception("DataFrame is empty. Check the query.")
+            raise Exception("Series is empty. Check the query.")
         
         return self.data
     
@@ -111,11 +111,7 @@ class KafkaLoader(DataLoader):
         print(f"drop query: {drop_stream_query}")
         self.run_command(drop_stream_query)
     
-    def convert_result_to_dataframe(self, result):
-        rows = []
-        for row in result[1:]: # first row contains query id and column metadata
-            time = row[0]
-            value = row[1]
-            rows.append({'time': time, 'value': value})
-        df = pd.DataFrame(rows)
-        return df
+    def convert_result_to_series(self, result):
+        data_list = result[1:] # first row contains query id and column metadata
+        data_series = pd.Series(data=[data_point for _, data_point in data_list], index=[timestamp for timestamp, _ in data_list]).sort_index()
+        return data_series
