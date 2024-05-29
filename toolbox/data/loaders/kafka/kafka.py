@@ -8,6 +8,7 @@ from ksql_query_builder import Builder, SelectContainer, CreateContainer
 
 from toolbox.ml_config import KafkaTopicConfiguration
 from toolbox.data.loaders.loader import DataLoader
+from toolbox.timeseries.timestamp import todatetime 
 
 TIME_COLUMN = "time"
 VALUE_COLUMN = "value"
@@ -66,7 +67,7 @@ class KafkaLoader(DataLoader):
         return query
 
     def get_data(self):
-        # Creates a DataFrame with columns: time, value 
+        # Creates a pd.Series with the time as index and the values as values of the Series 
         # Data is queried via KSQL from Kafka directly
         # 1. Create a stream to access the nested time and value fields
         # 2. Create a second stream that uses flat colums for time and value (this is needed as setting the time column is not possible on nested fields)
@@ -74,7 +75,7 @@ class KafkaLoader(DataLoader):
         
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
-        time.sleep(30)
+        time.sleep(30) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
@@ -113,5 +114,5 @@ class KafkaLoader(DataLoader):
     
     def convert_result_to_series(self, result):
         data_list = result[1:] # first row contains query id and column metadata
-        data_series = pd.Series(data=[data_point for _, data_point in data_list], index=[timestamp for timestamp, _ in data_list]).sort_index()
+        data_series = pd.Series(data=[data_point for _, data_point in data_list], index=[todatetime(timestamp) for timestamp, _ in data_list]).sort_index()
         return data_series
