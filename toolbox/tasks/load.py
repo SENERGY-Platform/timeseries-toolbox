@@ -4,6 +4,6 @@ from toolbox.ml_config import Config
 
 def get_task(task_name, config: Config):
     if task_name == 'ml_fit':
-        return Fit(config.TASK_SETTINGS, config.MLFLOW_URL, config.EXPERIMENT_NAME, config.USER_ID, config.COMMIT)
+        return Fit(config.TASK_SETTINGS, config.MLFLOW_URL, config.EXPERIMENT_NAME, config.USER_ID, config.TOOLBOX_VERSION, config.DATA_SETTINGS)
     elif task_name == 'load_shifting':
         return LoadShifting(config.TASK_SETTINGS)

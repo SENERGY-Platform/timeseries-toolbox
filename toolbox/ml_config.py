@@ -39,6 +39,7 @@ class Config:
     USER_ID: str = None 
     TASK: str = None 
     DATA_SOURCE: str = None 
+    TOOLBOX_VERSION: str = None
     
     def __init__(self) -> None:
         self.load_from_env()
@@ -52,13 +53,7 @@ class Config:
         self.USER_ID = environ['USER_ID']
         self.TASK = environ.get('TASK')
         self.DATA_SOURCE = environ['DATA_SOURCE']
-        
-        self.MODEL_ARTIFACT_NAME = environ.get('MODEL_ARTIFACT_NAME')
-        self.METRIC_FOR_SELECTION = environ.get('METRIC_FOR_SELECTION', 'mae')
-        self.METRIC_DIRECTION = environ.get('METRIC_DIRECTION', 'min')
-        self.COMMIT = environ.get('COMMIT', '')
-        self.MODELS = environ.get('MODELS','').split(';')
-        self.PREPROCESSOR = environ.get('PREPROCESSOR')
+        self.TOOLBOX_VERSION = environ.get('TOOLBOX_VERSION', '')
 
     def parse_data_settings(self):
         if self.DATA_SOURCE == 'kafka':

@@ -1,7 +1,9 @@
+import json
+
 import mlflow
 import mlflow.pyfunc
 
-def store_model(model_artifact, userid, config, job_name, commit, metrics):
+def store_model(model_artifact, userid, config, job_name, tool_box_version, metrics, data_settings):
     print('store model')
 
     mlflow.end_run()
@@ -21,7 +23,8 @@ def store_model(model_artifact, userid, config, job_name, commit, metrics):
     model_uri = f"runs:/{run.info.run_id}/{run_relative_artifcat_path}"
     tags = {
         "userid": userid,
-        "commit": commit
+        "tool_box_version": tool_box_version,
+        "data_settings": json.dumps(data_settings)
     }
     tags.update(config)
     mlflow.register_model(model_uri, job_name, tags=tags)
