@@ -4,7 +4,7 @@ import numpy as np
 
 class Isolation():
     def __init__(self) -> None:
-        self.all_reconstruction_errors = np.array()
+        self.all_reconstruction_errors = np.array([])
 
     def check(self, reconstruction_errors, contam):
         # reconstruction_errors: 1d
