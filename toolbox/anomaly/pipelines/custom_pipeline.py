@@ -53,6 +53,8 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         val_data = self.convert_data(val_data)
         print(f"Val: Model Input/Windows: {val_data.shape}: {val_data[:5]}")
         
+        # TODO: check enough data in both datasets 
+
         train_dataset = self.create_dataset(train_data)
         val_dataset = self.create_dataset(val_data)
 

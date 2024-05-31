@@ -35,8 +35,8 @@ class CNNAnomalyPipeline(AnomalyPipeline):
     def create_dataset(self, data):
         # 2D Numpy Array to Torch Dataset
         print(data)
-        assert data.ndim == 2
-        assert data.shape[1] == self.window_length
+        assert data.ndim == 2, "Window data must be 2d"
+        assert data.shape[1] == self.window_length, "Window length does not match configured window_length"
         return DataSet(data)
 
     def convert_to_numpy(self, tensor):
