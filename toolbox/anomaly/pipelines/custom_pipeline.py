@@ -38,12 +38,18 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         self.window_length = window_length
 
     def fit(self, train_data, val_data):
+        print("Start model fit")
+        print(f"Training Data: {train_data[:5]}")
         self.training_max_value = train_data.max()
+        
         train_data = self._preprocess_df(train_data)
+        print(f"Preprocessed Data: {train_data[:5]}")
         val_data = self._preprocess_df(val_data)
 
         train_data = self.convert_data(train_data)
+        print(f"Model Input/Windows: {train_data.shape}: {train_data[:5]}")
         val_data = self.convert_data(val_data)
+                
         train_dataset = self.create_dataset(train_data)
         val_dataset = self.create_dataset(val_data)
 
@@ -116,7 +122,7 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         return data 
 
     def _preprocess_df(self, data):
-        data = self._preprocess_without_smoothin(data)
+        data = self._preprocess_without_smoothing(data)
 
         smooter = Smoothing()
         data = smooter.run(data)
@@ -130,6 +136,7 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         return self._predict(data)    
 
     def convert_data(self, data_series):
+        print(data_series)
         stride = 1 # TODO in task settings
         values = list(data_series)
         windows = []
