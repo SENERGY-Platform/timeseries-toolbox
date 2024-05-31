@@ -79,7 +79,7 @@ class KafkaLoader(DataLoader):
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
-        print(f"RETRIEVED DATA: {result}")
+        print(f"RETRIEVED DATA: {result[:10]}")
 
         self.remove_stream(stream_name)
         self.remove_stream(unnesting_stream_name)

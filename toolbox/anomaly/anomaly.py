@@ -2,10 +2,7 @@ from toolbox.anomaly.plots import plot_losses, plot_reconstructions
 from sklearn.model_selection import train_test_split
 from toolbox.anomaly.pipelines.cnn.pipeline import CNNAnomalyPipeline
 from toolbox.anomaly.pipelines.trf.pipeline import TRFAnomalyPipeline
-from toolbox.data.preprocessors.normalization import Normalizer
-from toolbox.data.preprocessors.resampling import Resampler
-from toolbox.data.preprocessors.smoothing import Smoothing
-from toolbox.data.preprocessors.duplicates import Duplicates
+
 
 QUANTILS = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98]
 
@@ -25,8 +22,6 @@ class AnomalyTask():
         config['plot_enabled'] = False
         config['out_dir'] = '.'
         pipeline = self._get_pipeline(model_name)(**config)
-        training_max_value = train_data.max()
-        train_data = self._preprocess_df(train_data, training_max_value)
         train_data, validation_data = self.split_data(train_data)
         pipeline.fit(train_data, validation_data)
         return pipeline, {}, None
@@ -87,18 +82,3 @@ class AnomalyTask():
 
     def get_pipeline_hyperparams(self, pipeline_name, train_ts):
         return self._get_pipeline(pipeline_name).get_hyperparams(self.frequency, train_ts, self.window_size)
-
-    def _preprocess_df(self, data, training_max_value):
-        dup = Duplicates()
-        data = dup.run(data)
-
-        norm = Normalizer()
-        data = norm.run(data, training_max_value)
-
-        re = Resampler()
-        data = re.run(data)
-
-        smooter = Smoothing()
-        data = smooter.run(data)
-
-        return data

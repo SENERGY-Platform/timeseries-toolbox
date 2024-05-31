@@ -1,8 +1,13 @@
 from toolbox.general_pipelines.train.pipeline import TrainPipeline
 from toolbox.general_pipelines.inference.pipeline import InferencePipeline
+from toolbox.data.preprocessors.normalization import Normalizer
+from toolbox.data.preprocessors.resampling import Resampler
+from toolbox.data.preprocessors.smoothing import Smoothing
+from toolbox.data.preprocessors.duplicates import Duplicates
+from toolbox.anomaly.pipelines.quantil import Quantil
+from toolbox.anomaly.pipelines.isolation import Isolation 
 
 from torch.utils.data import DataLoader
-import torch 
 import mlflow
 import numpy as np
 
@@ -33,6 +38,10 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         self.window_length = window_length
 
     def fit(self, train_data, val_data):
+        self.training_max_value = train_data.max()
+        train_data = self._preprocess_df(train_data)
+        val_data = self._preprocess_df(val_data)
+
         train_data = self.convert_data(train_data)
         val_data = self.convert_data(val_data)
         train_dataset = self.create_dataset(train_data)
@@ -51,36 +60,68 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
        
         return n_epochs, self.train_losses
 
-    def calc_threshold(self, losses, quantil):
-        quantiles = torch.tensor([quantil], dtype=torch.float32)
-        quants = torch.quantile(losses, quantiles)
-        threshold = quants[0]
-        return threshold
-
-    def get_anomalies(self, strategy='quantil', quantil='95'):
+    def setup_anomaly_scorer(self, strategy):
         if strategy == 'quantil':
-            threshold = self.calc_threshold(self.train_losses, quantil)
-            anomaly_indices = torch.where(self.test_losses > threshold)[0]
-            normal_indices = torch.where(self.test_losses < threshold)[0]
-            
-            return anomaly_indices, normal_indices
+            self.quantil = Quantil()
+           
+        elif strategy == 'isolation':
+            self.isolation = Isolation()
 
+    def get_anomalies(self, reconstruction_errors):
+        if self.strategy == 'quantil':
+            anomaly_indices, _ = self.quantil.check(reconstruction_errors)
+           
+        elif self.strategy == 'isolation':
+            anomaly_indices = self.isolation.check(reconstruction_errors, 0.005)
+            # TODO: Cut of previous reconstruction error list self.test_losses
+            
+        return anomaly_indices
+            
     def predict_with_quantil(self, data, quantil):
         if quantil:
             self.quantil = quantil
         
         return self._predict(data)
 
-    def _predict(self, data):
-        data = self.convert_data(data)
+    def _predict(self, raw_data):
+        preprocessed_data = self._preprocess_without_smoothing(raw_data)
+        smoothed_data = self._preprocess_df(raw_data)
+
+        data = self.convert_data(smoothed_data)
         test_dataset = self.create_dataset(data)
         dataloader = DataLoader(test_dataset, batch_size=64)
         pipeline = InferencePipeline(self.model, dataloader, self.loss)
         self.test_losses, self.test_recons = pipeline.run()
 
-        anomaly_indices, normal_indices = self.get_anomalies("quantil", self.quantil)
+        anomaly_indices, normal_indices = self.get_anomalies(self.test_losses)
         reconstructions = self.convert_to_numpy(self.test_recons) 
-        return reconstructions, anomaly_indices, normal_indices, self.test_losses
+        
+        if reconstructions.shape[0] > 0:
+            anomalous_time_window = preprocessed_data[-self.window_length:]
+            anomalous_time_window_smooth = smoothed_data[-self.window_length:]
+    
+            return reconstructions, anomaly_indices, normal_indices, self.test_losses, anomalous_time_window, anomalous_time_window_smooth
+
+    def _preprocess_without_smoothing(self, data):
+        # TODO: timestamp.replace(microsecond=0)
+        dup = Duplicates()
+        data = dup.run(data)
+
+        norm = Normalizer()
+        data = norm.run(data, self.training_max_value)
+
+        re = Resampler()
+        data = re.run(data)
+
+        return data 
+
+    def _preprocess_df(self, data):
+        data = self._preprocess_without_smoothin(data)
+
+        smooter = Smoothing()
+        data = smooter.run(data)
+
+        return data
 
     def set_quantil(self, quantil):
         self.quantil = quantil
