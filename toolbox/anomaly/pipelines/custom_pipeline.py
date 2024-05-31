@@ -36,6 +36,8 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         self.early_stopping_delta = early_stopping_delta
         self.plot_enabled = plot_enabled
         self.window_length = window_length
+        self.strategy = "isolation" # TODO configurable
+        self.setup_anomaly_scorer()
 
     def fit(self, train_data, val_data):
         print("Start model fit")
@@ -71,11 +73,11 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
        
         return n_epochs, self.train_losses
 
-    def setup_anomaly_scorer(self, strategy):
-        if strategy == 'quantil':
+    def setup_anomaly_scorer(self):
+        if self.strategy == 'quantil':
             self.quantil = Quantil()
            
-        elif strategy == 'isolation':
+        elif self.strategy == 'isolation':
             self.isolation = Isolation()
 
     def get_anomalies(self, reconstruction_errors):
@@ -88,12 +90,6 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
             
         return anomaly_indices
             
-    def predict_with_quantil(self, data, quantil):
-        if quantil:
-            self.quantil = quantil
-        
-        return self._predict(data)
-
     def _predict(self, raw_data):
         preprocessed_data = self._preprocess_without_smoothing(raw_data)
         smoothed_data = self._preprocess_df(raw_data)
@@ -133,9 +129,6 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         data = smooter.run(data)
 
         return data
-
-    def set_quantil(self, quantil):
-        self.quantil = quantil
     
     def predict(self, context, data, params=None):
         return self._predict(data)    
