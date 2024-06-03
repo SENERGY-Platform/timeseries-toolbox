@@ -28,8 +28,13 @@ class KafkaLoader(DataLoader):
     def create_unnesting_stream(self):
         # Build the `CREATE STREAM` query to access the nested value and time fields
         stream_name = str(uuid.uuid4().hex)
+
+        timestamp_data_type = "STRING"
+        if self.topic_config.timestamp_format == "unix":
+            timestamp_data_type = "BIGINT"
+
         create_containers = [
-            CreateContainer(path=self.topic_config.path_to_time, type="STRING"), 
+            CreateContainer(path=self.topic_config.path_to_time, type=timestamp_data_type), 
             CreateContainer(path=self.topic_config.path_to_value, type="DOUBLE"), 
             CreateContainer(path=self.topic_config.filterType, type="STRING")
         ]
