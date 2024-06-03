@@ -109,7 +109,7 @@ class KafkaLoader(DataLoader):
         res = httpx.post(self.ksql_server_url + "/query-stream", data=json.dumps({
             "sql": query,
             "streamsProperties": self.stream_properties
-        }), timeout=30, headers={'Accept': 'application/json'})
+        }), timeout=180, headers={'Accept': 'application/json'})
         if res.status_code != httpx.codes.OK:
             raise Exception(f"Could not query data: {res.text}")
         return res.json()
