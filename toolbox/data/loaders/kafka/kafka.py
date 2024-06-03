@@ -71,8 +71,13 @@ class KafkaLoader(DataLoader):
         query = f"""SELECT {TIME_COLUMN}, {VALUE_COLUMN} FROM {stream_name}"""
         query += f" WHERE {self.topic_config.filterType} = '{self.topic_config.filterValue}'"
 
-        unix_ts_first_point = self.calc_unix_ts_ms(time_value, time_level)
-        query += f" AND UNIX_TIMESTAMP({TIME_COLUMN}) > UNIX_TIMESTAMP()-{unix_ts_first_point};"
+
+        ts = TIME_COLUMN
+        if self.topic_config.timestamp_format != "unix":
+            unix_ts_first_point = self.calc_unix_ts_ms(time_value, time_level)
+            ts = "UNIX_TIMESTAMP({TIME_COLUMN})"
+        
+        query += f" AND {ts}) > UNIX_TIMESTAMP()-{unix_ts_first_point};"
         print(f"create select query: {query}")
         return query
 
