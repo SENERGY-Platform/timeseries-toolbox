@@ -77,7 +77,7 @@ class KafkaLoader(DataLoader):
         if self.topic_config.timestamp_format != "unix":
             ts = "UNIX_TIMESTAMP({TIME_COLUMN})"
         
-        query += f" AND {ts}) > UNIX_TIMESTAMP()-{unix_ts_first_point};"
+        query += f" AND {ts} > UNIX_TIMESTAMP()-{unix_ts_first_point};"
         print(f"create select query: {query}")
         return query
 
