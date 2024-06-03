@@ -38,6 +38,12 @@ class KafkaLoader(DataLoader):
         self.run_command(query)
         return stream_name
 
+    def add_ts_format(self):
+        ts_format = self.topic_config.timestamp_format.replace('T', "''T''").replace('Z', "''Z''") # KSQL requires T and Z to be escaped
+        if ts_format != "unix":
+            return ", timestamp_format='{ts_format}'"
+        return ""
+
     def create_stream(self, unnesting_stream_name):
         # Create a stream that uses the time field as timestamp for further time filtering
         stream_name = str(uuid.uuid4().hex)
@@ -47,8 +53,7 @@ class KafkaLoader(DataLoader):
             SelectContainer(column_name=VALUE_COLUMN, path=self.topic_config.path_to_value)
         ]
         select_query = self.builder.build_select_query(unnesting_stream_name, select_containers)
-        ts_format = self.topic_config.timestamp_format.replace('T', "''T''").replace('Z', "''Z''") # KSQL requires T and Z to be escaped
-        query = f"CREATE STREAM {stream_name} WITH (timestamp='{TIME_COLUMN}', timestamp_format='{ts_format}') AS {select_query};"
+        query = f"CREATE STREAM {stream_name} WITH (timestamp='{TIME_COLUMN}'{self.add_ts_format()}) AS {select_query};"
         print(f"create flattened stream query: {query}")
         self.run_command(query)
         return stream_name

@@ -58,7 +58,9 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         # TODO: check enough data in both datasets 
 
         train_dataset = self.create_dataset(train_data)
+        print(f"Train Dataset Length: {len(train_dataset)}")
         val_dataset = self.create_dataset(val_data)
+        print(f"Val Dataset Length: {len(val_data)}")
 
         train_dataloader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
         val_dataloader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True)
@@ -91,23 +93,30 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         return anomaly_indices
             
     def _predict(self, raw_data):
+        # Will only run prediction on last window
         preprocessed_data = self._preprocess_without_smoothing(raw_data)
         smoothed_data = self._preprocess_df(raw_data)
-
-        data = self.convert_data(smoothed_data)
-        test_dataset = self.create_dataset(data)
-        dataloader = DataLoader(test_dataset, batch_size=64)
+        print(f"Preprocessed Inference Data: {smoothed_data.size} {smoothed_data[:5]}")
+        
+        # Cut beginning of data
+        smoothed_data = smoothed_data[-self.window_length:]
+        print(f"Inference: Model Input/Windows: {smoothed_data.shape}")
+        
+        window_data = self.convert_data(smoothed_data)
+        test_dataset = self.create_dataset(window_data)
+        print(f"Inference Dataset Length: {len(test_dataset)}")
+        dataloader = DataLoader(test_dataset, batch_size=1)
         pipeline = InferencePipeline(self.model, dataloader, self.loss)
         self.test_losses, self.test_recons = pipeline.run()
 
-        anomaly_indices, normal_indices = self.get_anomalies(self.test_losses)
+        anomaly_indices = self.get_anomalies(self.test_losses)
         reconstructions = self.convert_to_numpy(self.test_recons) 
-        
-        if reconstructions.shape[0] > 0:
-            anomalous_time_window = preprocessed_data[-self.window_length:]
-            anomalous_time_window_smooth = smoothed_data[-self.window_length:]
+        print(f"Reconstructions: {reconstructions.shape}")
+
+        anomalous_time_window = preprocessed_data[-self.window_length:]
+        anomalous_time_window_smooth = smoothed_data[-self.window_length:]
     
-            return reconstructions, anomaly_indices, normal_indices, self.test_losses, anomalous_time_window, anomalous_time_window_smooth
+        return reconstructions, anomaly_indices, self.test_losses, anomalous_time_window, anomalous_time_window_smooth, self.isolation.get_all_reconstruction_errors()
 
     def _preprocess_without_smoothing(self, data):
         # TODO: timestamp.replace(microsecond=0)
@@ -134,7 +143,6 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         return self._predict(data)    
 
     def convert_data(self, data_series):
-        print(data_series)
         stride = 1 # TODO in task settings
         values = list(data_series)
         windows = []
@@ -142,7 +150,7 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         start = 0
         end = self.window_length
 
-        while end < len(values):
+        while end <= len(values):
             window = values[start:end]
             windows.append(window)
             start += stride
