@@ -113,6 +113,7 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         reconstructions = self.convert_to_numpy(self.test_recons) 
         print(f"Reconstructions: {reconstructions.shape}")
 
+        reconstructions = reconstructions[0]
         anomalous_time_window = preprocessed_data[-self.window_length:]
         anomalous_time_window_smooth = smoothed_data[-self.window_length:]
     
