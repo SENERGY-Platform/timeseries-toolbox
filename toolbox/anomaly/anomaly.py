@@ -2,6 +2,7 @@ from toolbox.anomaly.plots import plot_losses, plot_reconstructions
 from sklearn.model_selection import train_test_split
 from toolbox.anomaly.pipelines.cnn.pipeline import CNNAnomalyPipeline
 from toolbox.anomaly.pipelines.trf.pipeline import TRFAnomalyPipeline
+from toolbox.data.preprocessors.sorting import Sorter
 
 
 QUANTILS = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98]
@@ -22,6 +23,8 @@ class AnomalyTask():
         config['plot_enabled'] = False
         config['out_dir'] = '.'
         pipeline = self._get_pipeline(model_name)(**config)
+        sorter = Sorter()
+        train_data = sorter.run(train_data)
         train_data, validation_data = self.split_data(train_data)
         pipeline.fit(train_data, validation_data)
         return pipeline, {}, None
