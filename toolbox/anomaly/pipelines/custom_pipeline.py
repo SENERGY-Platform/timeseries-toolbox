@@ -123,12 +123,15 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         # TODO: timestamp.replace(microsecond=0)
         dup = Duplicates()
         data = dup.run(data)
+        print(f"Nr. data points after Dedup: {data.size}: Exp: {data[0]}")
 
         norm = Normalizer()
         data = norm.run(data, self.training_max_value)
+        print(f"Nr. data points after Norm: {data.size}: Exp: {data[0]}")
 
         re = Resampler()
         data = re.run(data)
+        print(f"Nr. data points after Resample: {data.size}: Exp: {data[0]}")
 
         return data 
 
