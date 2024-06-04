@@ -90,7 +90,7 @@ class KafkaLoader(DataLoader):
         
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
-        time.sleep(30) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
+        time.sleep(60) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
@@ -109,7 +109,7 @@ class KafkaLoader(DataLoader):
         res = httpx.post(self.ksql_server_url + "/query-stream", data=json.dumps({
             "sql": query,
             "streamsProperties": self.stream_properties
-        }), timeout=None, headers={'Accept': 'application/json'})
+        }), timeout=600, headers={'Accept': 'application/json'}) # 10 min timeout to read data
         if res.status_code != httpx.codes.OK:
             raise Exception(f"Could not query data: {res.text}")
         return res.json()
