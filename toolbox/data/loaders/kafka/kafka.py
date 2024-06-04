@@ -4,6 +4,8 @@ import httpx
 import time 
 import datetime 
 import logging
+import sys
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 import pandas as pd 
 from ksql_query_builder import Builder, SelectContainer, CreateContainer
@@ -92,7 +94,8 @@ class KafkaLoader(DataLoader):
         
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
-        time.sleep(60) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
+        logging.debug("Wait 120s")
+        time.sleep(120) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
@@ -109,12 +112,12 @@ class KafkaLoader(DataLoader):
     
     def query_data(self, query):
         with httpx.Client(http2=True) as client:
-            timeout = 600
+            timeout = 600 # 10 min timeout to read data
             logging.debug(f"Try to query data from ksql with timeout {timeout}: Now: {datetime.datetime.now()}")
             res = client.post(self.ksql_server_url + "/query-stream", data=json.dumps({
                 "sql": query,
                 "streamsProperties": self.stream_properties
-            }), timeout=timeout, headers={'Accept': 'application/json'}) # 10 min timeout to read data
+            }), timeout=timeout, headers={'Accept': 'application/json'}) 
             if res.status_code != httpx.codes.OK:
                 raise Exception(f"Could not query data: {res.text}")
             return res.json()
