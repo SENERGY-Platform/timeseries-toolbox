@@ -41,19 +41,19 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
 
     def fit(self, train_data, val_data):
         print("Start model fit")
-        print(f"Training Raw Data: {train_data[:5]}")
-        print(f"Val Raw Data: {val_data[:5]}")
+        print(f"Training Raw Data: {train_data.size}: {train_data[:5]}")
+        print(f"Val Raw Data: {val_data.size}: {val_data[:5]}")
         self.training_max_value = train_data.max()
         
         train_data = self._preprocess_df(train_data)
-        print(f"Preprocessed Train Data: {train_data[:5]}")
+        print(f"Preprocessed Train Data: {train_data.size}: {train_data[:5]}")
         val_data = self._preprocess_df(val_data)
-        print(f"Preprocessed Val Data: {val_data[:5]}")
+        print(f"Preprocessed Val Data: {val_data.size}: {val_data[:5]}")
 
         train_data = self.convert_data(train_data)
-        print(f"Train: Model Input/Windows: {train_data.shape}: {train_data[:5]}")
+        print(f"Train: Model Input/Windows: {train_data.size}: {train_data[:5]}")
         val_data = self.convert_data(val_data)
-        print(f"Val: Model Input/Windows: {val_data.shape}: {val_data[:5]}")
+        print(f"Val: Model Input/Windows: {val_data.size}: {val_data[:5]}")
         
         # TODO: check enough data in both datasets 
 
