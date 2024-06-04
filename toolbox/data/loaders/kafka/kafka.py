@@ -1,7 +1,6 @@
 import uuid
 import json 
 import httpx
-import requests
 import time 
 import datetime 
 import logging
@@ -95,8 +94,8 @@ class KafkaLoader(DataLoader):
         
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
-        logging.debug("Wait 120s")
-        time.sleep(120) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
+        logging.debug("Wait 10 minutes")
+        time.sleep(600) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
@@ -111,7 +110,9 @@ class KafkaLoader(DataLoader):
         
         return self.data
     
-    def query_data_http2(self, query):
+    def query_data(self, query):
+        # This will use the new /query-stream endpoint
+        # httpx will try to use http2
         with httpx.Client(http2=True) as client:
             timeout = 600 # 10 min timeout to read data
             logging.debug(f"Try to query data from ksql with timeout {timeout}: Now: {datetime.datetime.now()}")
@@ -122,15 +123,6 @@ class KafkaLoader(DataLoader):
             if res.status_code != httpx.codes.OK:
                 raise Exception(f"Could not query data: {res.text}")
             return res.json()
-
-    def query_data(self, query):
-        r = requests.post(self.ksql_server_url + "/query", data=json.dumps({
-                "sql": query,
-                "streamsProperties": self.stream_properties
-        }), timeout=600)
-        if r.status_code != httpx.codes.OK:
-            raise Exception(f"Could not query data: {r.text}")
-        return r.json()
 
     def run_command(self, command):
         res = httpx.post(self.ksql_server_url + "/ksql", data=json.dumps({
