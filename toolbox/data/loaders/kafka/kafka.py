@@ -1,6 +1,7 @@
 import uuid
 import json 
 import httpx
+import requests
 import time 
 import datetime 
 import logging
@@ -110,7 +111,7 @@ class KafkaLoader(DataLoader):
         
         return self.data
     
-    def query_data(self, query):
+    def query_data_http2(self, query):
         with httpx.Client(http2=True) as client:
             timeout = 600 # 10 min timeout to read data
             logging.debug(f"Try to query data from ksql with timeout {timeout}: Now: {datetime.datetime.now()}")
@@ -121,6 +122,15 @@ class KafkaLoader(DataLoader):
             if res.status_code != httpx.codes.OK:
                 raise Exception(f"Could not query data: {res.text}")
             return res.json()
+
+    def query_data(self, query):
+        r = requests.post(self.ksql_server_url + "/query", data=json.dumps({
+                "sql": query,
+                "streamsProperties": self.stream_properties
+        }), timeout=600)
+        if r.status_code != httpx.codes.OK:
+            raise Exception(f"Could not query data: {r.text}")
+        return r.json()
 
     def run_command(self, command):
         res = httpx.post(self.ksql_server_url + "/ksql", data=json.dumps({
