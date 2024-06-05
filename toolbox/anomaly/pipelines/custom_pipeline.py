@@ -131,17 +131,17 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         logger.debug(f"Inference Dataset Length: {len(test_dataset)}")
         dataloader = DataLoader(test_dataset, batch_size=1)
         pipeline = InferencePipeline(self.model, dataloader, self.loss)
-        self.test_losses, self.test_recons = pipeline.run()
+        reconstruction_errors, reconstructions = pipeline.run()
 
-        anomaly_indices = self.get_anomalies(self.test_losses)
-        reconstructions = self.convert_to_numpy(self.test_recons) 
+        reconstruction_error = reconstruction_errors.numpy()[0]
+        anomaly_indices = self.get_anomalies(reconstruction_error)
         logger.debug(f"Reconstructions: {reconstructions.shape}")
 
-        reconstructions = reconstructions[0]
+        reconstruction = reconstructions.numpy()[0]
         anomalous_time_window = preprocessed_data[-self.window_length:]
         anomalous_time_window_smooth = smoothed_data[-self.window_length:]
     
-        return reconstructions, anomaly_indices, self.test_losses, anomalous_time_window, anomalous_time_window_smooth, self.isolation.get_all_reconstruction_errors()
+        return reconstruction, anomaly_indices, anomalous_time_window, anomalous_time_window_smooth, self.isolation.get_all_reconstruction_errors()
 
     def _preprocess_without_smoothing(self, data):
         drop = DropMs()

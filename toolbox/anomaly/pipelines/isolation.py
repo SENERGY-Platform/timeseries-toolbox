@@ -15,7 +15,7 @@ class Isolation():
         predictions = anomalous_error_model.predict(np.array(reconstruction_error).reshape(-1,1))
         print(f"Isolation Prediction for last recon error: {predictions[-1]} - {anomalous_error_model.decision_function(np.array(reconstruction_error).reshape(-1,1))[-1]}")
         print(f"All Recon Errors: {self.all_reconstruction_errors}")
-        for i in range(len(reconstruction_error)):
+        for i in range(len(self.all_reconstruction_errors)):
             if predictions[i]==-1 and reconstruction_error[i]>median(reconstruction_error):
                 anomalous_indices.append(i)
         return anomalous_indices

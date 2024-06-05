@@ -39,10 +39,6 @@ class CNNAnomalyPipeline(AnomalyPipeline):
         assert data.shape[1] == self.window_length, "Window length does not match configured window_length"
         return DataSet(data)
 
-    def convert_to_numpy(self, tensor):
-        # Convert Model Output back to 2D Numpy Array
-        return tensor.flatten(1)
-
     @staticmethod
     def get_hyperparams(freq, train_ts, window_length):
         kernel_sizes = [2,5,7,10]

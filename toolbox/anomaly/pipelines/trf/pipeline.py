@@ -47,10 +47,6 @@ class TRFAnomalyPipeline(AnomalyPipeline):
         assert data.shape[1] == self.window_length
         return WindowDataset(data, self.sequence_length, self.token_emb_dim)
 
-    def convert_to_numpy(self, tensor):
-        # Convert Model Output back to 2D Numpy Array
-        return tensor.flatten(1)
-
     @staticmethod
     def get_hyperparams(freq, train_ts, window_length):
         return {

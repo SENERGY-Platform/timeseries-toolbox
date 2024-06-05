@@ -5,7 +5,6 @@ import time
 import datetime 
 import logging
 import sys
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 import pandas as pd 
 from ksql_query_builder import Builder, SelectContainer, CreateContainer
@@ -16,6 +15,12 @@ from toolbox.timeseries.timestamp import todatetime
 
 TIME_COLUMN = "time"
 VALUE_COLUMN = "value"
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 # EXAMPLE QUERIES
 # CREATE STREAM hannes21 (device_id STRING, value STRUCT<root STRUCT<energy DOUBLE, time STRING>>) WITH (kafka_topic='urn_infai_ses_service_16e21f0a-19b4-4e5a-9247-5917ec9a4124', value_format='json', partitions=1);
@@ -43,7 +48,7 @@ class KafkaLoader(DataLoader):
             CreateContainer(path=self.topic_config.filterType, type="STRING")
         ]
         query = self.builder.build_create_stream_query(stream_name, self.topic_config.name, create_containers) + ";"
-        logging.debug(f"create unnesting query: {query}")
+        logger.debug(f"create unnesting query: {query}")
         self.run_command(query)
         return stream_name
 
@@ -63,7 +68,7 @@ class KafkaLoader(DataLoader):
         ]
         select_query = self.builder.build_select_query(unnesting_stream_name, select_containers)
         query = f"CREATE STREAM {stream_name} WITH (timestamp='{TIME_COLUMN}'{self.add_ts_format()}) AS {select_query};"
-        logging.debug(f"create flattened stream query: {query}")
+        logger.debug(f"create flattened stream query: {query}")
         self.run_command(query)
         return stream_name
 
@@ -82,7 +87,7 @@ class KafkaLoader(DataLoader):
             ts = "UNIX_TIMESTAMP({TIME_COLUMN})"
         
         query += f" AND {ts} > UNIX_TIMESTAMP()-{unix_ts_first_point};"
-        logging.debug(f"create select query: {query}")
+        logger.debug(f"create select query: {query}")
         return query
 
     def get_data(self):
@@ -94,12 +99,12 @@ class KafkaLoader(DataLoader):
         
         unnesting_stream_name = self.create_unnesting_stream()
         stream_name = self.create_stream(unnesting_stream_name)
-        logging.debug("Wait 10 minutes")
+        logger.debug("Wait 10 minutes")
         time.sleep(600) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
         result = self.query_data(select_query)
         
-        logging.debug(f"RETRIEVED DATA: {result[:10]}")
+        logger.debug(f"RETRIEVED DATA: {result[:10]}")
 
         self.remove_stream(stream_name)
         self.remove_stream(unnesting_stream_name)
@@ -115,7 +120,7 @@ class KafkaLoader(DataLoader):
         # httpx will try to use http2
         with httpx.Client(http2=True) as client:
             timeout = 600 # 10 min timeout to read data
-            logging.debug(f"Try to query data from ksql with timeout {timeout}: Now: {datetime.datetime.now()}")
+            logger.debug(f"Try to query data from ksql with timeout {timeout}: Now: {datetime.datetime.now()}")
             res = client.post(self.ksql_server_url + "/query-stream", data=json.dumps({
                 "sql": query,
                 "streamsProperties": self.stream_properties
@@ -134,7 +139,7 @@ class KafkaLoader(DataLoader):
 
     def remove_stream(self, stream_name):
         drop_stream_query = f'DROP STREAM {stream_name};' 
-        logging.debug(f"drop query: {drop_stream_query}")
+        logger.debug(f"drop query: {drop_stream_query}")
         self.run_command(drop_stream_query)
     
     def convert_result_to_series(self, result):
