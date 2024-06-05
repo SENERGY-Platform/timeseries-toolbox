@@ -50,13 +50,14 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         val_data = self._preprocess_df(val_data)
         print(f"Preprocessed Val Data: {val_data.size}: {val_data[:5]}")
 
+        assert train_data.size >= self.window_length, "Not enough train data to build at least one window"
+        assert val_data.size >= self.window_length, "Not enough val data to build at least one window"
+
         train_data = self.convert_data(train_data)
         print(f"Train: Model Input/Windows: {train_data.size}: {train_data[:5]}")
         val_data = self.convert_data(val_data)
         print(f"Val: Model Input/Windows: {val_data.size}: {val_data[:5]}")
         
-        # TODO: check enough data in both datasets 
-
         train_dataset = self.create_dataset(train_data)
         print(f"Train Dataset Length: {len(train_dataset)}")
         val_dataset = self.create_dataset(val_data)
