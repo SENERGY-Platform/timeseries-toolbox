@@ -1,3 +1,6 @@
+import logging 
+import sys 
+
 from toolbox.general_pipelines.train.pipeline import TrainPipeline
 from toolbox.general_pipelines.inference.pipeline import InferencePipeline
 from toolbox.data.preprocessors.normalization import Normalizer
@@ -6,18 +9,26 @@ from toolbox.data.preprocessors.smoothing import Smoothing
 from toolbox.data.preprocessors.duplicates import Duplicates
 from toolbox.anomaly.pipelines.quantil import Quantil
 from toolbox.anomaly.pipelines.isolation import Isolation 
+from toolbox.data.preprocessors.drop_ms import DropMs
 
 from torch.utils.data import DataLoader
 import mlflow
 import numpy as np
 
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
 def log_data_summary(prefix, series):
-    print("###")
-    print(prefix)
-    print(series.describe())
-    print(f"First: {series.index[0]} - {series.iloc[0]}")
-    print(f"Last: {series.index[-1]} - {series.iloc[-1]}")
-    print("###")
+    logger.debug("###")
+    logger.debug(prefix)
+    logger.debug(series.describe())
+    if series.size > 0:
+        logger.debug(f"First: {series.index[0]} - {series.iloc[0]}")
+        logger.debug(f"Last: {series.index[-1]} - {series.iloc[-1]}")
+    logger.debug("###")
 
 class AnomalyPipeline(mlflow.pyfunc.PythonModel):
     def __init__(
@@ -47,8 +58,11 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         self.strategy = "isolation" # TODO configurable
         self.setup_anomaly_scorer()
 
+    def __check_input_data_size(self, data, data_title):
+        assert data.size >= self.window_length, f"Not enough {data_title} data to build at least one window"
+
     def fit(self, train_data, val_data):
-        print("Start model fit")
+        logger.debug("Start model fitting")
         log_data_summary("Raw Train Data", train_data)
         log_data_summary("Raw Val Data", val_data)
         self.training_max_value = train_data.max()
@@ -58,18 +72,18 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         val_data = self._preprocess_df(val_data)
         log_data_summary("Preprocessed Val Data", val_data)
 
-        assert train_data.size >= self.window_length, "Not enough train data to build at least one window"
-        assert val_data.size >= self.window_length, "Not enough val data to build at least one window"
+        self.__check_input_data_size(train_data, "Train")
+        self.__check_input_data_size(val_data, "Val")
 
         train_data = self.convert_data(train_data)
-        print(f"Train: Model Input/Windows: {train_data.size}: {train_data[:5]}")
+        logger.debug(f"Train: Model Input/Windows: {train_data.size}: {train_data[:5]}")
         val_data = self.convert_data(val_data)
-        print(f"Val: Model Input/Windows: {val_data.size}: {val_data[:5]}")
+        logger.debug(f"Val: Model Input/Windows: {val_data.size}: {val_data[:5]}")
         
         train_dataset = self.create_dataset(train_data)
-        print(f"Train Dataset Length: {len(train_dataset)}")
+        logger.debug(f"Train Dataset Length: {len(train_dataset)}")
         val_dataset = self.create_dataset(val_data)
-        print(f"Val Dataset Length: {len(val_data)}")
+        logger.debug(f"Val Dataset Length: {len(val_data)}")
 
         train_dataloader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
         val_dataloader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True)
@@ -107,19 +121,21 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         smoothed_data = self._preprocess_df(raw_data)
 
         # Cut beginning of data
-        smoothed_data = smoothed_data[-self.window_length:]
-        log_data_summary("Preprocessed Inference Data", smoothed_data)
+        inference_data = smoothed_data[-self.window_length:]
+        log_data_summary("Preprocessed Inference Data", inference_data)
+
+        self.__check_input_data_size(inference_data, "Inference")
 
         window_data = self.convert_data(smoothed_data)
         test_dataset = self.create_dataset(window_data)
-        print(f"Inference Dataset Length: {len(test_dataset)}")
+        logger.debug(f"Inference Dataset Length: {len(test_dataset)}")
         dataloader = DataLoader(test_dataset, batch_size=1)
         pipeline = InferencePipeline(self.model, dataloader, self.loss)
         self.test_losses, self.test_recons = pipeline.run()
 
         anomaly_indices = self.get_anomalies(self.test_losses)
         reconstructions = self.convert_to_numpy(self.test_recons) 
-        print(f"Reconstructions: {reconstructions.shape}")
+        logger.debug(f"Reconstructions: {reconstructions.shape}")
 
         reconstructions = reconstructions[0]
         anomalous_time_window = preprocessed_data[-self.window_length:]
@@ -128,7 +144,10 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         return reconstructions, anomaly_indices, self.test_losses, anomalous_time_window, anomalous_time_window_smooth, self.isolation.get_all_reconstruction_errors()
 
     def _preprocess_without_smoothing(self, data):
-        # TODO: timestamp.replace(microsecond=0)
+        drop = DropMs()
+        data = drop.run(data)
+        log_data_summary("After: Drop ms", data)
+
         dup = Duplicates()
         data = dup.run(data)
         log_data_summary("After: Deduplication", data)
