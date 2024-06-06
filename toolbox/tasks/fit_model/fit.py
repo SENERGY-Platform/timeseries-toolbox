@@ -29,4 +29,4 @@ class Fit(Task):
         train_config = self.task_settings.model_parameter
         model_name = self.task_settings.model_name
         pipeline, metrics, plots = task.fit(data, train_config, model_name)
-        store_model(pipeline, self.userid, train_config, self.job_name, self.tool_box_version, metrics, self.data_settings.__dict__)
+        store_model(pipeline, self.userid, train_config, self.job_name, self.tool_box_version, metrics, self.data_settings.__dict__, task.get_model_signature())

@@ -4,7 +4,7 @@ import mlflow
 import mlflow.pyfunc
 from mlflow import MlflowClient
 
-def store_model(model_artifact, userid, config, job_name, tool_box_version, metrics, data_settings):
+def store_model(model_artifact, userid, config, job_name, tool_box_version, metrics, data_settings, signature):
     # This will store the model at MLFlow model registry
     # If it does not exist, it will be created with version 1
     # All following models will increment the version by 1
@@ -23,7 +23,8 @@ def store_model(model_artifact, userid, config, job_name, tool_box_version, metr
 
         mlflow.pyfunc.log_model(
             artifact_path=run_relative_artifcat_path,
-            python_model=model_artifact
+            python_model=model_artifact,
+            signature=signature
         )
     
     model_uri = f"runs:/{run.info.run_id}/{run_relative_artifcat_path}"
