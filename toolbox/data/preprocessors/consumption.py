@@ -1,7 +1,7 @@
 import pandas as pd 
 import numpy as np 
 
-from data.preprocessors.time_series import TimeSeriesPreprocessor
+from toolbox.data.preprocessors.time_series import TimeSeriesPreprocessor
 
 class ConsumptionPreProcessor(TimeSeriesPreprocessor):
     # Used for cummulative energy consumption data

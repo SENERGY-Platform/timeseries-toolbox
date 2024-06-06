@@ -10,10 +10,12 @@ from toolbox.data.preprocessors.duplicates import Duplicates
 from toolbox.anomaly.pipelines.quantil import Quantil
 from toolbox.anomaly.pipelines.isolation import Isolation 
 from toolbox.data.preprocessors.drop_ms import DropMs
+from .utils import Reconstruction
 
 from torch.utils.data import DataLoader
 import mlflow
 import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
@@ -29,6 +31,7 @@ def log_data_summary(prefix, series):
         logger.debug(f"First: {series.index[0]} - {series.iloc[0]}")
         logger.debug(f"Last: {series.index[-1]} - {series.iloc[-1]}")
     logger.debug("###")
+
 
 class AnomalyPipeline(mlflow.pyfunc.PythonModel):
     def __init__(
@@ -75,15 +78,15 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         self.__check_input_data_size(train_data, "Train")
         self.__check_input_data_size(val_data, "Val")
 
-        train_data = self.convert_data(train_data)
-        logger.debug(f"Train: Model Input/Windows: {train_data.size}: {train_data[:5]}")
-        val_data = self.convert_data(val_data)
-        logger.debug(f"Val: Model Input/Windows: {val_data.size}: {val_data[:5]}")
+        train_window_data = self.convert_data(train_data)
+        logger.debug(f"Train: Model Input/Windows: {train_window_data.size}: {train_window_data[:5]}")
+        val_window_data = self.convert_data(val_data)
+        logger.debug(f"Val: Model Input/Windows: {val_window_data.size}: {val_window_data[:5]}")
         
-        train_dataset = self.create_dataset(train_data)
+        train_dataset = self.create_dataset(train_window_data)
         logger.debug(f"Train Dataset Length: {len(train_dataset)}")
-        val_dataset = self.create_dataset(val_data)
-        logger.debug(f"Val Dataset Length: {len(val_data)}")
+        val_dataset = self.create_dataset(val_window_data)
+        logger.debug(f"Val Dataset Length: {len(val_dataset)}")
 
         train_dataloader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
         val_dataloader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True)
@@ -93,34 +96,57 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
 
         # Calculate final train sample losses for threshold 
         pipeline = InferencePipeline(self.model, train_dataloader, self.loss)
-        all_losses, _ = pipeline.run()
-        self.train_losses = all_losses
-       
-        return n_epochs, self.train_losses
+        reconstruction_errors, _ = pipeline.run()
 
+        self.set_train_reconstruction_errors(reconstruction_errors.numpy(), train_data)
+
+    def set_train_reconstruction_errors(self, reconstruction_errors, data):
+        # reconstruction_errors: Numpy Array [NUMBER_WINDOWS, 1]
+        logger.debug(f"All Train Reconstruction Errors Shape: {reconstruction_errors.shape}") 
+        reconstruction_errors = []
+        for window_index in range(len(reconstruction_errors)):
+            window_start_index = window_index*self.window_length
+            window_end_index = window_start_index + self.window_length
+            last_timestamp_of_window = data[window_start_index:window_end_index].index[-1]
+            reconstruction_error = Reconstruction(last_timestamp_of_window, reconstruction_errors[window_index])
+            reconstruction_errors.append(reconstruction_error)
+            
+        if self.strategy == 'isolation':
+            self.isolation.set_all_reconstruction_errors(reconstruction_errors)
+    
     def setup_anomaly_scorer(self):
         if self.strategy == 'quantil':
             self.quantil = Quantil()
            
         elif self.strategy == 'isolation':
-            self.isolation = Isolation()
+            self.isolation = Isolation(pd.Timedelta(14, "d"))
 
-    def get_anomalies(self, reconstruction_errors):
+    def get_anomalies(self, reconstruction_error):
         if self.strategy == 'quantil':
-            anomaly_indices, _ = self.quantil.check(reconstruction_errors)
+            #TODO: old quantil check is based on batches, here single recon error will be passed. 
+            anomaly_indices, _ = self.quantil.check(reconstruction_error)
            
         elif self.strategy == 'isolation':
-            anomaly_indices = self.isolation.check(reconstruction_errors, 0.005)
-            # TODO: Cut of previous reconstruction error list self.test_losses
+            anomaly_indices = self.isolation.check(reconstruction_error, 0.005)
             
         return anomaly_indices
-            
+
+    def get_all_reconstruction_errors(self):
+        if self.strategy == 'isolation':
+            return self.isolation.get_all_reconstruction_errors()
+
+    def set_all_reconstruction_errors(self, all_reconstruction_errors):
+        if self.strategy == 'isolation':
+            return self.isolation.set_all_reconstruction_errors(all_reconstruction_errors)
+
     def _predict(self, raw_data):
-        # Will only run prediction on last window
+        # We cut the inference data to only keep the last window.
+        # Previous data is only used for better smoothing
+        # Output will therefore only be valid for one window
+
         preprocessed_data = self._preprocess_without_smoothing(raw_data)
         smoothed_data = self._preprocess_df(raw_data)
 
-        # Cut beginning of data
         inference_data = smoothed_data[-self.window_length:]
         log_data_summary("Preprocessed Inference Data", inference_data)
 
@@ -133,9 +159,9 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         pipeline = InferencePipeline(self.model, dataloader, self.loss)
         reconstruction_errors, reconstructions = pipeline.run()
 
-        reconstruction_error = reconstruction_errors.numpy()[0]
+        reconstruction_error = Reconstruction(inference_data.index[-1], reconstruction_errors.numpy()[0])
         anomaly_indices = self.get_anomalies(reconstruction_error)
-        logger.debug(f"Reconstructions: {reconstructions.shape}")
+        logger.debug(f"All Reconstruction Outputs: {reconstructions.shape}")
 
         reconstruction = reconstructions.numpy()[0]
         anomalous_time_window = preprocessed_data[-self.window_length:]

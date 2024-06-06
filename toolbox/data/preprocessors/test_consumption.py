@@ -1,4 +1,4 @@
-from consumption import ConsumptionPreProcessor
+from .consumption import ConsumptionPreProcessor
 import pandas as pd 
 
 df = pd.DataFrame({
