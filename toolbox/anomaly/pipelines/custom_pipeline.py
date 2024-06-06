@@ -198,6 +198,11 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         return data
     
     def predict(self, context, data, params=None):
+        if params:
+            saved_reconstruction_errors = params.get("saved_reconstruction_errors")
+            if saved_reconstruction_errors:
+                self.set_all_reconstruction_errors(saved_reconstruction_errors)
+                
         return self._predict(data)    
 
     def convert_data(self, data_series):
