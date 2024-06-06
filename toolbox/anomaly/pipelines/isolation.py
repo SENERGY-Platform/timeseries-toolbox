@@ -7,7 +7,6 @@ class Isolation():
         self.all_reconstruction_errors = []
 
     def check(self, reconstruction_error, contam):
-        # reconstruction_errors: 1d
         # assert reconstruction_errors.shape
         anomalous_indices = []
         self.all_reconstruction_errors.append(reconstruction_error)
@@ -16,7 +15,7 @@ class Isolation():
         print(f"Isolation Prediction for last recon error: {predictions[-1]} - {anomalous_error_model.decision_function(np.array(reconstruction_error).reshape(-1,1))[-1]}")
         print(f"All Recon Errors: {self.all_reconstruction_errors}")
         for i in range(len(self.all_reconstruction_errors)):
-            if predictions[i]==-1 and reconstruction_error[i]>median(reconstruction_error):
+            if predictions[i]==-1 and self.all_reconstruction_errors[i]>median(self.all_reconstruction_errors):
                 anomalous_indices.append(i)
         return anomalous_indices
 
@@ -24,5 +23,5 @@ class Isolation():
         return self.all_reconstruction_errors
 
     def set_all_reconstruction_errors(self):
-        # TODO 
+        # TODO persist
         pass
