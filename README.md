@@ -1,3 +1,7 @@
+<a href="https://github.com/SENERGY-Platform/timeseries-toolbox/actions/workflows/tests.yaml" rel="nofollow">
+    <img src="https://github.com/SENERGY-Platform/timeseries-toolbox/actions/workflows/tests.yaml/badge.svg" alt="Tests" />
+</a>
+
 # TimeSeries Toolbox
 
 ## Forecasting 
