@@ -4,6 +4,8 @@ from toolbox.anomaly.pipelines.cnn.pipeline import CNNAnomalyPipeline
 from toolbox.anomaly.pipelines.trf.pipeline import TRFAnomalyPipeline
 from toolbox.data.preprocessors.sorting import Sorter
 
+import pandas as pd
+from mlflow.models import infer_signature
 
 
 class AnomalyTask():
@@ -31,3 +33,8 @@ class AnomalyTask():
 
     def get_pipeline_hyperparams(self, pipeline_name, train_ts):
         return self._get_pipeline(pipeline_name).get_hyperparams(self.frequency, train_ts, self.window_size)
+
+    def get_model_signature(self):
+        example_input = pd.Series([10.2, 20.5], index=[pd.Timestamp("2015-01-01 01:01:01"), pd.Timestamp("2015-01-01 02:01:01")])
+        signature = infer_signature(example_input, params={"saved_reconstruction_errors": []})
+        return signature
