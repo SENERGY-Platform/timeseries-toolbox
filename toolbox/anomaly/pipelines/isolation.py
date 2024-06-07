@@ -11,21 +11,17 @@ class Isolation():
 
     def check(self, current_reconstruction_error: Reconstruction, contam):
         # assert reconstruction_errors.shape
-        anomalous_indices = []
         self.all_reconstruction_errors.append(current_reconstruction_error)
         self.discard_old_errors()
-
-        all_reconstruction_error_values = np.array([recon.reconstruction_error for recon in self.all_reconstruction_errors]).reshape(-1,1)
+        all_reconstruction_error_values = np.array([recon.reconstruction_error for recon in self.all_reconstruction_errors])
         current_reconstruction_error_value = np.array(current_reconstruction_error.reconstruction_error).reshape(-1,1)
         
-        anomalous_error_model = IsolationForest(contamination=contam).fit(all_reconstruction_error_values)
+        anomalous_error_model = IsolationForest(contamination=contam).fit(all_reconstruction_error_values.reshape(-1,1))
         predictions = anomalous_error_model.predict(current_reconstruction_error_value)
+        print(f"Prediction Shape for all reconstructions: {predictions.shape}")
         print(f"Isolation Prediction for last recon error: {predictions[-1]} - {anomalous_error_model.decision_function(current_reconstruction_error_value)[-1]}")
         print(f"All Recon Errors: {all_reconstruction_error_values}")
-        for i in range(len(all_reconstruction_error_values)):
-            if predictions[i]==-1 and all_reconstruction_error_values[i]>median(all_reconstruction_error_values):
-                anomalous_indices.append(i)
-        return anomalous_indices
+        return predictions[0]==-1 and all_reconstruction_error_values[-1]>median(all_reconstruction_error_values) 
 
     def get_all_reconstruction_errors(self):
         return self.all_reconstruction_errors

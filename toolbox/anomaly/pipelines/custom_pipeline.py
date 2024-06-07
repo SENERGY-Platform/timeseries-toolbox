@@ -121,15 +121,15 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         elif self.strategy == 'isolation':
             self.isolation = Isolation(pd.Timedelta(14, "d"))
 
-    def get_anomalies(self, reconstruction_error):
+    def is_reconstruction_error_anomalous(self, reconstruction_error):
         if self.strategy == 'quantil':
             #TODO: old quantil check is based on batches, here single recon error will be passed. 
-            anomaly_indices, _ = self.quantil.check(reconstruction_error)
-           
+            # anomaly_indices, _ = self.quantil.check(reconstruction_error)
+            pass 
+
         elif self.strategy == 'isolation':
-            anomaly_indices = self.isolation.check(reconstruction_error, 0.005)
+            return self.isolation.check(reconstruction_error, 0.005)
             
-        return anomaly_indices
 
     def get_all_reconstruction_errors(self):
         if self.strategy == 'isolation':
@@ -165,14 +165,14 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         reconstruction_errors, reconstructions = pipeline.run()
 
         reconstruction_error = Reconstruction(inference_data.index[-1], reconstruction_errors.numpy()[0])
-        anomaly_indices = self.get_anomalies(reconstruction_error)
+        reconstruction_error_is_anomalous = self.is_reconstruction_error_anomalous(reconstruction_error)
         logger.debug(f"All Reconstruction Outputs: {reconstructions.shape}")
 
         reconstruction = reconstructions.numpy()[0]
         anomalous_time_window = preprocessed_data[-self.window_length:]
         anomalous_time_window_smooth = smoothed_data[-self.window_length:]
     
-        return reconstruction, anomaly_indices, anomalous_time_window, anomalous_time_window_smooth, self.isolation.get_all_reconstruction_errors()
+        return reconstruction, reconstruction_error_is_anomalous, anomalous_time_window, anomalous_time_window_smooth, self.isolation.get_all_reconstruction_errors()
 
     def _preprocess_without_smoothing(self, data):
         drop = DropMs()
