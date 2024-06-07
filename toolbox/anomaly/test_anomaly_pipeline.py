@@ -1,7 +1,9 @@
 from .anomaly import AnomalyTask
+from toolbox.model_registry import store_model
 import pandas as pd 
 import numpy as np 
 import unittest
+import mlflow
 
 def random_dates(start, end, n=10):
     start_u = start.value//10**9
@@ -15,6 +17,14 @@ def random_series():
     n = 50 
     ts = random_dates(start, end, n)
     data = pd.Series(np.random.randint(0, 10, n), index=ts)
+    return data
+
+def random_df():
+    start = pd.to_datetime('2015-01-01')
+    end = pd.to_datetime('2015-01-03')
+    n = 50 
+    ts = random_dates(start, end, n)
+    data = pd.DataFrame({"value": np.random.randint(0, 10, n), "time": ts})
     return data
 
 class TestAnomalyPipeline(unittest.TestCase):
@@ -37,4 +47,7 @@ class TestAnomalyPipeline(unittest.TestCase):
         }
         pipeline, _, _ = task.fit(data, config, model_name)
 
-        pipeline.predict(_, data, _)
+        pipeline.predict(_, random_df(), _)
+        mlflow.set_tracking_uri("http://localhost:5003")
+        # TODO remove
+        #store_model(pipeline, "", {}, "job", "", {}, {}, task.get_model_signature())

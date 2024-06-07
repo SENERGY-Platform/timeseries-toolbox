@@ -139,13 +139,18 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
         if self.strategy == 'isolation':
             return self.isolation.set_all_reconstruction_errors(all_reconstruction_errors)
 
-    def _predict(self, raw_data):
+    def convert_df_to_series(self, df: pd.DataFrame):
+        df = df.set_index("time")
+        return df["value"]
+
+    def _predict(self, raw_data_df):
         # We cut the inference data to only keep the last window.
         # Previous data is only used for better smoothing
         # Output will therefore only be valid for one window
 
-        preprocessed_data = self._preprocess_without_smoothing(raw_data)
-        smoothed_data = self._preprocess_df(raw_data)
+        raw_data_series = self.convert_df_to_series(raw_data_df)
+        preprocessed_data = self._preprocess_without_smoothing(raw_data_series)
+        smoothed_data = self._preprocess_df(raw_data_series)
 
         inference_data = smoothed_data[-self.window_length:]
         log_data_summary("Preprocessed Inference Data", inference_data)
