@@ -157,7 +157,7 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
 
         self.__check_input_data_size(inference_data, "Inference")
 
-        window_data = self.convert_data(smoothed_data)
+        window_data = self.convert_data(inference_data)
         test_dataset = self.create_dataset(window_data)
         logger.debug(f"Inference Dataset Length: {len(test_dataset)}")
         dataloader = DataLoader(test_dataset, batch_size=1)
