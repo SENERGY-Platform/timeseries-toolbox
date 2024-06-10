@@ -51,4 +51,4 @@ class TestAnomalyPipeline(unittest.TestCase):
         pipeline.predict(_, random_df(), _)
         mlflow.set_tracking_uri("http://localhost:5003")
         # TODO remove
-        #store_model(pipeline, "", {}, "job", "", {}, {}, task.get_model_signature())
+        store_model(pipeline, "", {}, "job", "", {}, {}, task.get_model_signature())

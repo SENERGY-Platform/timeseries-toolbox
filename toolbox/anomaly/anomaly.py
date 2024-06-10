@@ -36,5 +36,5 @@ class AnomalyTask():
 
     def get_model_signature(self):
         example_input = pd.DataFrame({"value": [10.2, 20.5], "time": [pd.Timestamp("2015-01-01 01:01:01"), pd.Timestamp("2015-01-01 02:01:01")]})
-        signature = infer_signature(example_input, params={"saved_reconstruction_errors": []})
+        signature = infer_signature(example_input)
         return signature
