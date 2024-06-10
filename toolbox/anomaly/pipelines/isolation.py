@@ -27,7 +27,7 @@ class Isolation():
         return self.all_reconstruction_errors
 
     def set_all_reconstruction_errors(self, all_reconstruction_errors):
-        self.all_reconstruction_errors = all_reconstruction_errors
+        self.all_reconstruction_errors = all_reconstruction_errors or []
 
     def discard_old_errors(self):
         last_timestamp = self.all_reconstruction_errors[-1].timestamp
