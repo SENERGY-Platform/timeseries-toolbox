@@ -5,9 +5,10 @@ import numpy as np
 from .utils import Reconstruction
 
 class Isolation():
-    def __init__(self, time_to_keep_values) -> None:
+    def __init__(self, time_to_keep_values, logger) -> None:
         self.all_reconstruction_errors: list[Reconstruction] = []
         self.time_to_keep_values = time_to_keep_values
+        self.logger = logger
 
     def check(self, current_reconstruction_error: Reconstruction, contam):
         # assert reconstruction_errors.shape
@@ -18,9 +19,8 @@ class Isolation():
         
         anomalous_error_model = IsolationForest(contamination=contam).fit(all_reconstruction_error_values.reshape(-1,1))
         predictions = anomalous_error_model.predict(current_reconstruction_error_value)
-        print(f"Prediction Shape for all reconstructions: {predictions.shape}")
-        print(f"Isolation Prediction for last recon error: {predictions[-1]} - {anomalous_error_model.decision_function(current_reconstruction_error_value)[-1]}")
-        print(f"All Recon Errors: {all_reconstruction_error_values}")
+        self.logger.debug(f"Isolation Prediction for current recon error: {predictions[-1]} - {anomalous_error_model.decision_function(current_reconstruction_error_value)[-1]}")
+        self.logger.debug(f"All Recon Errors: {all_reconstruction_error_values}")
         return predictions[0]==-1 and all_reconstruction_error_values[-1]>median(all_reconstruction_error_values) 
 
     def get_all_reconstruction_errors(self):

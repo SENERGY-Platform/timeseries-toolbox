@@ -14,8 +14,3 @@ reconstruction_errors = [Reconstruction(pd.Timestamp.now(), 30), Reconstruction(
 model.set_all_reconstruction_errors(reconstruction_errors)
 
 reconstructions, anomaly_indices, normal_indices, test_losses, _ = loaded_model.predict(timeseries)
-
-print(reconstructions)
-print(normal_indices)
-print(anomaly_indices)
-print(test_losses)

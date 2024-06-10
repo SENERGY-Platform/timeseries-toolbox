@@ -22,6 +22,7 @@ handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+logger.propagate = False
 
 def log_data_summary(prefix, series):
     logger.debug("###")
@@ -119,7 +120,7 @@ class AnomalyPipeline(mlflow.pyfunc.PythonModel):
             self.quantil = Quantil()
            
         elif self.strategy == 'isolation':
-            self.isolation = Isolation(pd.Timedelta(14, "d"))
+            self.isolation = Isolation(pd.Timedelta(14, "d"), logger)
 
     def is_reconstruction_error_anomalous(self, reconstruction_error):
         if self.strategy == 'quantil':
