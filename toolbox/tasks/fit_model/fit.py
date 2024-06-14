@@ -26,6 +26,7 @@ class Fit(Task):
 
     def run(self, data):
         use_case_name = self.task_settings.use_case
+        use_case = ""
         if use_case_name == "anomaly":
             use_case = AnomalyTask()
         elif use_case_name == "peak_shaving":
