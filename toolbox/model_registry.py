@@ -17,7 +17,7 @@ def store_model(model_artifact, userid, config, job_name, tool_box_version, metr
     run_relative_artifcat_path = 'models'
 
     # Create a new model version and save model
-    with mlflow.start_run(run_name="store-best-model") as run:
+    with mlflow.start_run(run_name="store-model") as run:
         mlflow.log_metrics(metrics)
         mlflow.log_params(config)
 
@@ -39,7 +39,7 @@ def store_model(model_artifact, userid, config, job_name, tool_box_version, metr
     client.set_registered_model_alias(job_name, "production", created_model_version.version)
 
 
-def load_model(model_name,version, mlflow_url):
+def load_model(model_name, version, mlflow_url):
     mlflow.set_tracking_uri(mlflow_url)
     model_uri = f"models:/{model_name}/{version}"
     loaded_model = mlflow.pyfunc.load_model(model_uri)

@@ -1,4 +1,3 @@
-from toolbox.anomaly.plots import plot_losses, plot_reconstructions 
 from sklearn.model_selection import train_test_split
 from toolbox.anomaly.pipelines.cnn.pipeline import CNNAnomalyPipeline
 from toolbox.anomaly.pipelines.trf.pipeline import TRFAnomalyPipeline
