@@ -1,0 +1,1 @@
+These are some scripts to test without running the complete workflow on the platform
