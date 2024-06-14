@@ -25,8 +25,6 @@ def get_task(task_name, config: Config):
         return Fit(task_settings, mlflow_url, job_name, userid, toolbox_version, data_settings)
     elif task_name == 'load_shifting':
         return LoadShifting(task_settings)
-    elif task_name == 'peak_shaving':
-        return PeakShaving(task_settings, mlflow_url, job_name, userid, toolbox_version, data_settings)
 
 def run():    
     config = Config()

@@ -5,7 +5,7 @@ import numpy as np
 import kneed
 
 class PeakShavingPipeline(mlflow.pyfunc.PythonModel):
-    def __init__(self, ) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
     def predict(self, context, data, params=None):  
