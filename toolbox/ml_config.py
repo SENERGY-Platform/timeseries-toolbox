@@ -1,7 +1,7 @@
 from os import environ
 import uuid 
 import typing 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 
 @dataclass
@@ -31,7 +31,7 @@ class S3Configuration:
 class MLSettings:
     use_case: str
     model_name: str = ''
-    model_parameter: 'typing.Any' = {} 
+    model_parameter: 'typing.Any' = field(default_factory=lambda: {})
 
 class Config:
     """Base config."""
