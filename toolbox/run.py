@@ -4,7 +4,6 @@ import logging
 import sys 
 from toolbox.tasks.fit_model.fit import Fit
 from toolbox.tasks.load_shifting.run import LoadShifting
-from toolbox.tasks.peak_shaving.peak_shaving import PeakShaving
 from toolbox.ml_config import Config
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)

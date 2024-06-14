@@ -14,7 +14,7 @@ def get_install_requires():
 
 setuptools.setup(
       name='timeseries-toolbox',
-      version='2.2.52',
+      version='2.2.53',
       description='ML Toolbox',
       author='Hannes Hansen',
       author_email='',
