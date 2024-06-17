@@ -1,13 +1,13 @@
 from sklearn.model_selection import train_test_split
-from toolbox.anomaly.pipelines.cnn.pipeline import CNNAnomalyPipeline
-from toolbox.anomaly.pipelines.trf.pipeline import TRFAnomalyPipeline
+from toolbox.anomaly.cnn.pipeline import CNNAnomalyPipeline
+from toolbox.anomaly.trf.pipeline import TRFAnomalyPipeline
 from toolbox.data.preprocessors.sorting import Sorter
 
 import pandas as pd
 from mlflow.models import infer_signature
 
 
-class AnomalyTask():
+class Anomaly():
     def __init__(self) -> None:
         super().__init__()
 

@@ -1,4 +1,4 @@
-from .anomaly import AnomalyTask
+from toolbox.tasks.fit_model.use_cases.anomaly.anomaly import Anomaly
 from toolbox.model_registry import store_model
 import pandas as pd 
 import numpy as np 
@@ -31,7 +31,7 @@ class TestAnomalyPipeline(unittest.TestCase):
 
     def test_simple_run(self):
         data = random_series()
-        task = AnomalyTask()
+        task = Anomaly()
         model_name = "cnn"
         config = {
                     "window_length": 205,

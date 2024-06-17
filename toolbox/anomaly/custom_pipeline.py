@@ -7,10 +7,10 @@ from toolbox.data.preprocessors.normalization import Normalizer
 from toolbox.data.preprocessors.resampling import Resampler
 from toolbox.data.preprocessors.smoothing import Smoothing
 from toolbox.data.preprocessors.duplicates import Duplicates
-from toolbox.anomaly.pipelines.quantil import Quantil
-from toolbox.anomaly.pipelines.isolation import Isolation 
+from toolbox.anomaly.quantil import Quantil
+from toolbox.anomaly.isolation import Isolation 
 from toolbox.data.preprocessors.drop_ms import DropMs
-from .utils import Reconstruction
+from toolbox.anomaly.utils import Reconstruction
 
 from torch.utils.data import DataLoader
 import mlflow

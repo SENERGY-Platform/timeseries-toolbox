@@ -1,0 +1,3 @@
+darts==0.24.0
+torch==2.0.1
+gluonts==0.13.2

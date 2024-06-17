@@ -1,8 +1,5 @@
-import tempfile
-from pathlib import Path
 import logging 
 
-import mlflow
 from ray import air, tune
 from ray.air.integrations.mlflow import MLflowLoggerCallback
 import pandas as pd
@@ -11,8 +8,6 @@ from scipy.optimize import minimize
 from ray.air import session
 
 from toolbox.ml_config import Config
-from toolbox.data.loaders.s3.s3 import S3DataLoader
-
 
 class LoadShifting():
     def __init__(self, mlflow_url) -> None:

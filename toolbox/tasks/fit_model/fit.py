@@ -1,8 +1,8 @@
 import mlflow
 
 from toolbox.tasks.task import Task
-from toolbox.anomaly.anomaly import AnomalyTask
-from toolbox.peak_shaving.use_case import PeakShavingUseCase
+from toolbox.tasks.fit_model.use_cases.anomaly.anomaly import Anomaly
+from toolbox.tasks.fit_model.use_cases.peak_shaving.peak_shaving import PeakShaving
 from toolbox.model_registry import store_model
 
 
@@ -28,9 +28,9 @@ class Fit(Task):
         use_case_name = self.task_settings.use_case
         use_case = ""
         if use_case_name == "anomaly":
-            use_case = AnomalyTask()
+            use_case = Anomaly()
         elif use_case_name == "peak_shaving":
-            use_case = PeakShavingUseCase()
+            use_case = PeakShaving()
         
         train_config = self.task_settings.model_parameter
         model_name = self.task_settings.model_name
