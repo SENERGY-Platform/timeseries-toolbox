@@ -14,7 +14,7 @@ def get_install_requires():
 
 setuptools.setup(
       name='toolbox',
-      version='2.2.66',
+      version='2.2.67',
       description='ML Toolbox',
       author='Hannes Hansen',
       author_email='',
