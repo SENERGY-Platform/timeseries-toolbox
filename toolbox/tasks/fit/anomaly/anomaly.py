@@ -2,14 +2,16 @@ from sklearn.model_selection import train_test_split
 from toolbox.anomaly.cnn.pipeline import CNNAnomalyPipeline
 from toolbox.anomaly.trf.pipeline import TRFAnomalyPipeline
 from toolbox.data.preprocessors.sorting import Sorter
+from toolbox.tasks.fit.fit import Fit 
 
 import pandas as pd
 from mlflow.models import infer_signature
 
+TASK_NAME = "anomaly_detection"
 
-class Anomaly():
-    def __init__(self) -> None:
-        super().__init__()
+class Anomaly(Fit):
+    def __init__(self, task_settings, mlflow_url, job_name, userid, tool_box_version, data_settings) -> None:
+        super().__init__(task_settings, mlflow_url, job_name, userid, tool_box_version, data_settings)
 
     def _get_pipeline(self, pipeline_name):
         if pipeline_name == "transformer":

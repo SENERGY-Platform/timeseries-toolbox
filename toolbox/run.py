@@ -2,9 +2,12 @@ from toolbox.ml_config import Config
 from toolbox.data.loaders.load import get_data_loader
 import logging 
 import sys 
-from toolbox.tasks.fit_model.fit import Fit
-from toolbox.tasks.load_shifting.run import LoadShifting
+
 from toolbox.ml_config import Config
+from toolbox.tasks.fit.anomaly import anomaly
+from toolbox.tasks.fit.peak_shaving import peak_shaving
+from toolbox.tasks.load_shifting import load_shifting
+
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
@@ -20,10 +23,12 @@ def get_task(task_name, config: Config):
     toolbox_version = config.TOOLBOX_VERSION 
     data_settings = config.DATA_SETTINGS
 
-    if task_name == 'ml_fit':
-        return Fit(task_settings, mlflow_url, job_name, userid, toolbox_version, data_settings)
-    elif task_name == 'load_shifting':
-        return LoadShifting(task_settings)
+    if task_name == anomaly.TASK_NAME:
+        return anomaly.Anomaly(task_settings, mlflow_url, job_name, userid, toolbox_version, data_settings)
+    elif task_name == load_shifting.TASK_NAME:
+        return load_shifting.LoadShifting(task_settings)
+    elif task_name == peak_shaving.TASK_NAME:
+        return peak_shaving.PeakShaving(task_settings, mlflow_url, job_name, userid, toolbox_version, data_settings)
 
 def run():    
     config = Config()

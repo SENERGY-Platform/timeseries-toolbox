@@ -5,6 +5,7 @@ from toolbox.load_shifting.load_shifting import LoadShifting
 from toolbox.data.loaders.s3.s3 import S3DataLoader
 from toolbox.tasks.task import Task
 
+TASK_NAME = "load_shifting"
 
 class LoadShifting(Task):
     def __init__(

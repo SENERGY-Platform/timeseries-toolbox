@@ -25,14 +25,7 @@ class Fit(Task):
         mlflow.set_tracking_uri(mlflow_url)
 
     def run(self, data):
-        use_case_name = self.task_settings.use_case
-        use_case = ""
-        if use_case_name == "anomaly":
-            use_case = Anomaly()
-        elif use_case_name == "peak_shaving":
-            use_case = PeakShaving()
-        
         train_config = self.task_settings.model_parameter
         model_name = self.task_settings.model_name
-        pipeline, metrics, plots = use_case.fit(data, train_config, model_name)
+        pipeline, metrics, plots = self.fit(data, train_config, model_name)
         store_model(pipeline, self.userid, train_config, self.job_name, self.tool_box_version, metrics, self.data_settings.__dict__, use_case.get_model_signature())

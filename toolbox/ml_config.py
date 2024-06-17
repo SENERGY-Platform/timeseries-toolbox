@@ -4,6 +4,8 @@ import typing
 from dataclasses import dataclass, field
 import json
 
+from toolbox.tasks.fit.anomaly.anomaly import TASK_NAME as anomaly_task_name
+
 @dataclass
 class KafkaTopicConfiguration:
     """"""
@@ -29,7 +31,6 @@ class S3Configuration:
 
 @dataclass
 class MLSettings:
-    use_case: str = ''
     model_name: str = ''
     model_parameter: 'typing.Any' = field(default_factory=lambda: {})
 
@@ -64,5 +65,5 @@ class Config:
             
     def parse_task_settings(self, task_settings):
         task_settings = json.loads(task_settings)
-        if self.TASK == 'ml_fit':
+        if self.TASK == anomaly_task_name:
             self.TASK_SETTINGS = MLSettings(**task_settings)
