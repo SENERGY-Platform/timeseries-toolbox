@@ -6,4 +6,4 @@ ksql-query-builder @ git+https://github.com/SENERGY-Platform/ksql-query-builder
 boto3==1.34.77
 httpx[http2]==0.27.0
 kneed==0.8.5
-scikit-learn==1.3.0
+scikit-learn==1.3.2
