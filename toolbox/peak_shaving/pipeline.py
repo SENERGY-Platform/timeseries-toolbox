@@ -32,7 +32,7 @@ class PeakShavingPipeline(mlflow.pyfunc.PythonModel):
 
     def fit(self, data): # data is a collection of numbers
         eps = self.determine_epsilon(data) 
-        db = DBSCAN(eps=eps, min_samples=10).fit(np.array(data.reshape(-1,1)))
+        db = DBSCAN(eps=eps, min_samples=10).fit(np.array(data).reshape(-1,1))
         clustering_labels = set(db.labels_) - {-1} # discard outlier label "-1"
         clusters = [np.array(data)[db.labels_==k] for k in clustering_labels] # This is the collection of clusters inside the data. Ouliers (i.e. label==-1) are thrwon away.
         self.min_boundaries = [min(cluster) for cluster in clusters]

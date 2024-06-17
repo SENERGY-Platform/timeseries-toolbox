@@ -29,7 +29,7 @@ class S3Configuration:
 
 @dataclass
 class MLSettings:
-    use_case: str
+    use_case: str = ''
     model_name: str = ''
     model_parameter: 'typing.Any' = field(default_factory=lambda: {})
 
