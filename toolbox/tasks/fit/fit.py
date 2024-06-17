@@ -1,8 +1,6 @@
 import mlflow
 
 from toolbox.tasks.task import Task
-from toolbox.tasks.fit_model.use_cases.anomaly.anomaly import Anomaly
-from toolbox.tasks.fit_model.use_cases.peak_shaving.peak_shaving import PeakShaving
 from toolbox.model_registry import store_model
 
 
