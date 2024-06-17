@@ -1,6 +1,6 @@
 from toolbox.tasks.fit_model.fit import Fit
 from toolbox.ml_config import MLSettings, KafkaTopicConfiguration
-from utils import random_df
+from utils import random_series
 
 task_settings = MLSettings(**{
     "model_parameter": {
@@ -19,7 +19,7 @@ task_settings = MLSettings(**{
     "use_case": "peak_shaving"
 })
 data_settings = KafkaTopicConfiguration(**{})
-timeseries = random_df()
+timeseries = random_series()
 
 task = Fit(
     task_settings=task_settings, 
