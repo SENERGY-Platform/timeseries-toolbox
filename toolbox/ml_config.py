@@ -44,8 +44,7 @@ class Config:
     def __init__(self) -> None:
         self.load_from_env()
         self.parse_data_settings()
-        if environ.get('TASK_SETTINGS'):
-            self.parse_task_settings(environ.get('TASK_SETTINGS'))
+        self.parse_task_settings(environ.get('TASK_SETTINGS', {}))
 
     def load_from_env(self):
         self.MLFLOW_URL = environ['MLFLOW_URL']
@@ -63,5 +62,4 @@ class Config:
             
     def parse_task_settings(self, task_settings):
         task_settings = json.loads(task_settings)
-        if self.TASK == "anomaly_detection":
-            self.TASK_SETTINGS = MLSettings(**task_settings)
+        self.TASK_SETTINGS = MLSettings(**task_settings)
