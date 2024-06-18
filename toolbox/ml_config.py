@@ -4,8 +4,6 @@ import typing
 from dataclasses import dataclass, field
 import json
 
-from toolbox.tasks.fit.anomaly.anomaly import TASK_NAME as anomaly_task_name
-
 @dataclass
 class KafkaTopicConfiguration:
     """"""
@@ -65,5 +63,5 @@ class Config:
             
     def parse_task_settings(self, task_settings):
         task_settings = json.loads(task_settings)
-        if self.TASK == anomaly_task_name:
+        if self.TASK == "anomaly_detection":
             self.TASK_SETTINGS = MLSettings(**task_settings)
