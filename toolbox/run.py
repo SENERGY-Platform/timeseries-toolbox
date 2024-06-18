@@ -40,4 +40,6 @@ def run():
     data_df = get_data(data_loader_name, data_settings)
 
     logging.debug(f"Shape of Raw Data from Data Source {data_df.shape}")
+    logging.debug(f"First Data Point: {data_df.iloc[0]}")
+    logging.debug(f"First Data Point: {data_df.iloc[-1]}")
     task.run(data_df)
