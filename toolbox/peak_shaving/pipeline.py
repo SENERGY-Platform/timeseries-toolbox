@@ -34,6 +34,7 @@ class PeakShavingPipeline(mlflow.pyfunc.PythonModel):
         distances, _ = neighbors_fit.kneighbors(np.array(data).reshape(-1,1))
         distances = np.sort(distances, axis=0)
         distances_x = distances[:,1]
+        logger.debug("Start KneeLocator")
         kneedle = kneed.KneeLocator(np.linspace(0,1,len(distances_x)), distances_x, S=1, curve="convex", direction="increasing")
         epsilon = kneedle.knee_y
         if epsilon==0 or epsilon==None:
