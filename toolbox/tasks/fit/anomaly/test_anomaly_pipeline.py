@@ -1,4 +1,4 @@
-from toolbox.tasks.fit_model.use_cases.anomaly.anomaly import Anomaly
+from toolbox.tasks.fit.anomaly.anomaly import Anomaly
 from toolbox.model_registry import store_model
 import pandas as pd 
 import numpy as np 
