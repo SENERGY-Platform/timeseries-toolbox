@@ -39,4 +39,5 @@ def run():
     task = get_task(task_name, config)
     data_df = get_data(data_loader_name, data_settings)
 
+    logging.debug(f"Shape of Raw Data from Data Source {data_df.shape}")
     task.run(data_df)
