@@ -37,10 +37,3 @@ def store_model(model_artifact, userid, config, job_name, tool_box_version, metr
     created_model_version = mlflow.register_model(model_uri, job_name, tags=tags)
     client = MlflowClient()
     client.set_registered_model_alias(job_name, "production", created_model_version.version)
-
-
-def load_model(model_name, version, mlflow_url):
-    mlflow.set_tracking_uri(mlflow_url)
-    model_uri = f"models:/{model_name}/{version}"
-    loaded_model = mlflow.pyfunc.load_model(model_uri)
-    return loaded_model
