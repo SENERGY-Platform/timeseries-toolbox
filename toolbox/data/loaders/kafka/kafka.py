@@ -55,7 +55,7 @@ class KafkaLoader(DataLoader):
     def add_ts_format(self):
         ts_format = self.topic_config.timestamp_format.replace('T', "''T''").replace('Z', "''Z''") # KSQL requires T and Z to be escaped
         if ts_format != "unix":
-            return ", timestamp_format='{ts_format}'"
+            return f", timestamp_format='{ts_format}'"
         return ""
 
     def create_stream(self, unnesting_stream_name):
