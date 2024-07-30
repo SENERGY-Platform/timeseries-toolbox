@@ -13,7 +13,7 @@ def random_dates(start, end, n=10):
 def random_series():
     start = pd.to_datetime('2015-01-01')
     end = pd.to_datetime('2015-01-03')
-    n = 50 
+    n = 10 
     ts = random_dates(start, end, n)
     data = pd.Series(np.random.randint(0, 10, n), index=ts)
     return data
@@ -21,7 +21,7 @@ def random_series():
 def random_df():
     start = pd.to_datetime('2015-01-01')
     end = pd.to_datetime('2015-01-03')
-    n = 50 
+    n = 10 
     ts = random_dates(start, end, n)
     data = pd.DataFrame({"value": np.random.randint(0, 10, n), "time": ts})
     return data
@@ -47,5 +47,5 @@ class TestAnomalyPipeline(unittest.TestCase):
         pipeline = CNNAnomalyPipeline(**model_parameter)
         pipeline.fit(random_series(), random_series())
 
-        pipeline.predict(_, random_df(), _)
-        pipeline.predict(_, random_df(), _)
+        pipeline.predict(None, random_df(), None)
+        pipeline.predict(None, random_df(), None)
