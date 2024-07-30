@@ -50,7 +50,7 @@ class KafkaLoader(DataLoader):
         query = self.builder.build_create_stream_query(stream_name, self.topic_config.name, create_containers) + ";"
         logger.debug(f"create unnesting query: {query}")
         self.run_command(query)
-        return stream_name
+        return stream_name, query
 
     def add_ts_format(self):
         ts_format = self.topic_config.timestamp_format
@@ -71,7 +71,7 @@ class KafkaLoader(DataLoader):
         query = f"CREATE STREAM {stream_name} WITH (timestamp='{TIME_COLUMN}'{self.add_ts_format()}) AS {select_query};"
         logger.debug(f"create flattened stream query: {query}")
         self.run_command(query)
-        return stream_name
+        return stream_name, query
 
     def calc_unix_ts_ms(self, time_value, level):
         return round(pd.Timedelta(float(time_value), level).total_seconds() * 1000)
@@ -98,8 +98,8 @@ class KafkaLoader(DataLoader):
         # 2. Create a second stream that uses flat colums for time and value (this is needed as setting the time column is not possible on nested fields)
         # 3. Select from the stream
         
-        unnesting_stream_name = self.create_unnesting_stream()
-        stream_name = self.create_stream(unnesting_stream_name)
+        unnesting_stream_name, unnesting_query = self.create_unnesting_stream()
+        stream_name, stream_query = self.create_stream(unnesting_stream_name)
         logger.debug("Wait 10 minutes")
         time.sleep(600) # Unfortunately without this random sleep, the select query will be empty. I guess that KSQL is not ready even though the requests return successfully 
         select_query = self.build_select_query(stream_name, self.topic_config.time_range_value, self.topic_config.time_range_level)
@@ -112,7 +112,7 @@ class KafkaLoader(DataLoader):
 
         self.data = self.convert_result_to_series(result)
         if self.data.empty:
-            raise Exception("Series is empty. Check the query.")
+            raise Exception(f"Series is empty. Check the queries: {unnesting_query} {stream_query} {select_query}")
         
         return self.data
     
