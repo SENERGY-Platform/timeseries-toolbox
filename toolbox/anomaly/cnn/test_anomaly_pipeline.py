@@ -39,7 +39,9 @@ class TestAnomalyPipeline(unittest.TestCase):
                     "latent_dims": 32,
                     "early_stopping_patience": 10,
                     "early_stopping_delta": 0,
-                    "kernel_size": 7
+                    "kernel_size": 7,
+                    "out_dir": ".",
+                    "plot_enabled": False
         }
         
         pipeline = CNNAnomalyPipeline(**model_parameter)
