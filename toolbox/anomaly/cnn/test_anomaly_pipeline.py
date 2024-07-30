@@ -1,5 +1,4 @@
-from toolbox.tasks.fit.anomaly.anomaly import Anomaly
-from toolbox.model_registry import store_model
+from toolbox.anomaly.cnn.pipeline import CNNAnomalyPipeline
 import pandas as pd 
 import numpy as np 
 import unittest
@@ -30,10 +29,7 @@ def random_df():
 class TestAnomalyPipeline(unittest.TestCase):
 
     def test_simple_run(self):
-        data = random_series()
-        task_settings = {
-            "model_name": "cnn",
-            "model_parameter":  {
+        model_parameter = {
                     "window_length": 205,
                     "batch_size": 1,
                     "lr": 0.01,
@@ -44,14 +40,10 @@ class TestAnomalyPipeline(unittest.TestCase):
                     "early_stopping_patience": 10,
                     "early_stopping_delta": 0,
                     "kernel_size": 7
-            }
         }
-        task = Anomaly(task_settings)
-       
-        pipeline, _, _ = task.run(data)
+        
+        pipeline = CNNAnomalyPipeline(**model_parameter)
+        pipeline.fit(random_series(), random_series())
 
         pipeline.predict(_, random_df(), _)
         pipeline.predict(_, random_df(), _)
-        mlflow.set_tracking_uri("http://localhost:5003")
-        # TODO remove
-        #store_model(pipeline, "", {}, "job", "", {}, {}, task.get_model_signature())
