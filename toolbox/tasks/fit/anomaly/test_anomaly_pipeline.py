@@ -31,9 +31,9 @@ class TestAnomalyPipeline(unittest.TestCase):
 
     def test_simple_run(self):
         data = random_series()
-        task = Anomaly()
-        model_name = "cnn"
-        config = {
+        task_settings = {
+            "model_name": "cnn",
+            "model_parameter":  {
                     "window_length": 205,
                     "batch_size": 1,
                     "lr": 0.01,
@@ -44,8 +44,11 @@ class TestAnomalyPipeline(unittest.TestCase):
                     "early_stopping_patience": 10,
                     "early_stopping_delta": 0,
                     "kernel_size": 7
+            }
         }
-        pipeline, _, _ = task.fit(data, config, model_name)
+        task = Anomaly(task_settings)
+       
+        pipeline, _, _ = task.run(data)
 
         pipeline.predict(_, random_df(), _)
         pipeline.predict(_, random_df(), _)
