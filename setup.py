@@ -14,16 +14,16 @@ def get_install_requires():
 
 setuptools.setup(
       name='toolbox',
-      version='2.2.86',
+      version='2.2.87',
       description='ML Toolbox',
       author='Hannes Hansen',
       author_email='',
       packages=setuptools.find_packages(),
-      #python_requires='>=3.9.0', KDEpy can only run with 3.8 maybe split code per usecase ?
+      python_requires='>=3.9.0',
       install_requires=get_install_requires(),
       extras_require={
           "anomaly_detection": ["scikit-learn==1.5.0", "torch==2.3.1", "mlflow==2.11.1"],
-          "peak_shaving": ["scipy<2", "mlflow==2.11.1", "KDEpy==1.1.9"],
+          "peak_shaving": ["scipy<2", "mlflow==2.11.1", "KDEpy==1.1.13"],
           "load_shifting": ["scipy==1.13.1", "ray==2.24.0", "mlflow==2.11.1"],
           "estimation": ["darts==0.24.0", "torch==2.0.1", "gluonts==0.13.2"],
           "data": ["ksql-query-builder @ git+https://github.com/SENERGY-Platform/ksql-query-builder", "boto3==1.34.77", "httpx[http2]==0.27.0"]
