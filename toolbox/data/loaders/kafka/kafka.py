@@ -39,6 +39,7 @@ class KafkaLoader(DataLoader):
         stream_name = str(uuid.uuid4().hex)
 
         timestamp_data_type = "STRING"
+        logger.debug("TIMESTAMP_FORMAT: " + self.topic_config.timestamp_format)
         if self.topic_config.timestamp_format == "unix":
             timestamp_data_type = "BIGINT"
 
