@@ -14,12 +14,12 @@ def get_install_requires():
 
 setuptools.setup(
       name='toolbox',
-      version='2.2.90',
+      version='2.2.91',
       description='ML Toolbox',
       author='Hannes Hansen',
       author_email='',
       packages=setuptools.find_packages(),
-      python_requires='>=3.9.0',
+      python_requires='>=3.10.0',
       install_requires=get_install_requires(),
       extras_require={
           "anomaly_detection": ["scikit-learn==1.5.0", "torch==2.3.1", "mlflow==3.2.0"],
