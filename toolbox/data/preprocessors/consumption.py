@@ -18,7 +18,7 @@ class ConsumptionPreProcessor(TimeSeriesPreprocessor):
             
             if len(values) > 1:
                 return values[-1] - values[0]
-            if values:
+            if len(values) == 1:
                 return values[0]
             return np.nan
 
